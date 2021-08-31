@@ -1,21 +1,24 @@
 {
-    "name": "danielneis/moodle-block_newblock",
-    "description": "A block template for Moodle based on http://docs.moodle.org/dev/Blocks",
+    "name": "simschn20/signed_quiz_export_block",
+    "description": "",
     "license": "GPLv3",
     "authors": [
         {
-            "name": "Daniel Neis Araujo",
-            "email": "danielneis@gmail.com"
+            "name": "Simon Schniedenharn",
+            "email": "simon.schniedenharn@mni.thm.de"
         }
     ],
     "type": "moodle-block",
     "require": {
-      "composer/installers": "~1.0"
+      "composer/installers": "~1.0",
+        "mpdf/mpdf": "^8.0",
+        "ext-curl": "*",
+        "ext-json": "*"
     },
     "require-dev": {
         "moodle/moodle": "3.11"
     },
     "extra": {
-      "installer-name": "newblock"
+      "installer-name": "signed quiz export"
     }
 }

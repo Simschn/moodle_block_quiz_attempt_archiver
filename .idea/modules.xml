@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/signed_quiz_export_block.iml" filepath="$PROJECT_DIR$/.idea/signed_quiz_export_block.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/signedquizexport.iml" filepath="$PROJECT_DIR$/.idea/signedquizexport.iml" />
     </modules>
   </component>
 </project>

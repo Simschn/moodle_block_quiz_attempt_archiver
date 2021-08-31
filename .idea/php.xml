@@ -4,6 +4,11 @@
     <include_path>
       <path value="$PROJECT_DIR$/vendor/composer" />
       <path value="$PROJECT_DIR$/vendor/moodle/moodle" />
+      <path value="$PROJECT_DIR$/vendor/psr/log" />
+      <path value="$PROJECT_DIR$/vendor/paragonie/random_compat" />
+      <path value="$PROJECT_DIR$/vendor/myclabs/deep-copy" />
+      <path value="$PROJECT_DIR$/vendor/setasign/fpdi" />
+      <path value="$PROJECT_DIR$/vendor/mpdf/mpdf" />
     </include_path>
   </component>
   <component name="PhpUnit">

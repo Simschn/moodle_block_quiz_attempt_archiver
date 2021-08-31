@@ -14,20 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Newblock block caps.
- *
- * @package   block_newblock
- * @copyright Daniel Neis <danielneis@gmail.com>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
-    'block/newblock:addinstance' => array(
-        'riskbitmask' => RISK_SPAM | RISK_XSS,
+    'block/signed_quiz_export:myaddinstance' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(
+            'user' => CAP_ALLOW
+        ),
 
+        'clonepermissionsfrom' => 'moodle/my:manageblocks'
+    ),
+    'block/signed_quiz_export:addinstance' => array(
+        'riskbitmask' => RISK_SPAM | RISK_XSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_BLOCK,
         'archetypes' => array(

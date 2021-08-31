@@ -28,7 +28,7 @@ $settings->add(new admin_setting_heading('sampleheader',
                                          get_string('headerconfig', 'block_signed_quiz_export'),
                                          get_string('descconfig', 'block_signed_quiz_export')));
 
-$settings->add(new admin_setting_configcheckbox('block_signed_quiz_export/foo',
-                                                get_string('labelfoo', 'block_signed_quiz_export'),
-                                                get_string('descfoo', 'block_signed_quiz_export'),
-                                                '0'));
+$settings->add(new admin_setting_configtext('block_signed_quiz_export/tsdomain', get_string('tsdomain', 'block_signed_quiz_export'),
+    get_string('tsinfo', 'block_signed_quiz_export'), null, PARAM_TEXT));
+$settings->add(new admin_setting_configtext('block_signed_quiz_export/tscert', get_string('tscert', 'block_signed_quiz_export'),
+    get_string('tscertinfo', 'block_signed_quiz_export'), null, PARAM_TEXT));

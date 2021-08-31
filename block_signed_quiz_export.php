@@ -21,8 +21,20 @@
  * @copyright  Daniel Neis <danielneis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
+
+//require_once($CFG->dirroot . '/mod/quiz/locallib.php');
+//require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport.php');
+//require_once($CFG->dirroot . '/mod/quiz/report/export/export_form.php');
+//require_once($CFG->dirroot . '/mod/quiz/report/export/export_options.php');
+//require_once($CFG->dirroot . '/mod/quiz/report/export/export_table.php');
+//require_once($CFG->dirroot . '/mod/quiz/report/export/export.php');
+
+require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/forms/block_form_download.php');
+require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/forms/block_form_sign.php');
+require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/forms/block_form_end.php');
+require_once($CFG->dirroot . '/blocks/signed_quiz_export/export.php');
+require_once($CFG->dirroot . '/blocks/signed_quiz_export/TrustedTimestamps.php');
 
 class block_signed_quiz_export extends block_base {
 
@@ -31,16 +43,38 @@ class block_signed_quiz_export extends block_base {
         $this->content_type = BLOCK_TYPE_TEXT;
     }
 
+    /**
+     * @throws coding_exception
+     * @throws dml_exception
+     */
     function get_content() {
-        global $CFG, $OUTPUT;
-
+        global $CFG, $OUTPUT, $DB, $PAGE;
         if ($this->content !== null) {
             return $this->content;
         }
-
+        $cm = $this->get_owning_activity();
+        //$PAGE->set_context(context_course::instance($cm->instance));
+        $quiz_attempts = $DB->get_records( 'quiz_attempts', array('quiz'=> $cm->instance));
         $this->content = new stdClass();
-        $this->content->footer = '<h3>FOOTER</h3>';
-        $this->content->text = '<h1>'. json_encode($this->get_owning_activity()) .'</h1>';
+        $this->content->text = '<h1>'. json_encode($PAGE->cm) . '</h1>';
+        $this->content->footer = '<h3>'.json_encode($cm) .'</h3>';
+        $mformSign = new block_form_sign($PAGE->url, array('id'=>$cm->id));
+        $mformDownload = new block_form_download($PAGE->url,array('id'=>$cm->id));
+        $mformEnd = new block_form_end($PAGE->url,array('id'=>$cm->id));
+
+        if($mformDownload->get_data()){
+            $this->handle_download($quiz_attempts);
+            exit();
+        }
+        if($mformSign->get_data()){
+            $this->handle_sign($quiz_attempts);
+        }
+        if($mformEnd->get_data()){
+            $this->handle_end();
+        }
+        $this->content->text .= $mformEnd->render();
+        $this->content->text .= $mformSign->render();
+        $this->content->text .= $mformDownload->render();
 
         return $this->content;
     }
@@ -62,7 +96,6 @@ class block_signed_quiz_export extends block_base {
      * @throws coding_exception
      */
     public function get_owning_activity() {
-        global $DB;
 
         // Set some defaults.
         $result = new stdClass();
@@ -81,5 +114,100 @@ class block_signed_quiz_export extends block_base {
         }
 
         return $cm;
+    }
+
+    function prepareFiles($attemptids){
+        global $DB;
+        $pdf_files = array();
+        $exporter = new quiz_export_engine();
+
+        $tmp_dir = sys_get_temp_dir();
+        $tmp_file = tempnam($tmp_dir, "mdl-qexp_");
+        $tmp_zip_file = $tmp_file . ".zip";
+        rename($tmp_file, $tmp_zip_file);
+        chmod($tmp_zip_file, 0644);
+
+        $zip = new ZipArchive;
+        $zip->open($tmp_zip_file);
+
+        foreach ($attemptids as $attemptid) {
+            $attemptobj = quiz_attempt::create($attemptid);
+            $pdf_file = $exporter->a2pdf($attemptobj);
+            $pdf_files[] = $pdf_file;
+            $student = $DB->get_record('user', array('id' => $attemptobj->get_userid()));
+            $zip->addFile($pdf_file, fullname($student, true) . "_" . $attemptid . '.pdf');
+        }
+        $zip->close();
+        foreach ($pdf_files as $pdf_file) {
+            unlink($pdf_file);
+        }
+        return $tmp_zip_file;
+    }
+
+
+    /**
+     * Export the quiz attempts
+     * @param object $quiz the quiz settings.
+     * @param object $cm the course_module object.
+     * @param array $attemptids the list of attempt ids to export.
+     * @param array $allowed This list of userids that are visible in the report.
+     *      Users can only export attempts that they are allowed to see in the report.
+     *      Empty means all users.
+     * @throws Exception
+     */
+    function export_attempts($attemptids, $tmp_zip_file)
+    {
+        global $CFG;
+        $time = time(); // this will get you the current time in unix time format (seconds since 1/1/1970 GMT)
+        $currentYear = userdate($time,'%Y');
+        $backupTime = userdate($time, '%Y%m%d-%H%M'); // this will print the time in the timezone of the current user (formats)
+        if(!is_dir($CFG->dataroot.'/backups/'. $currentYear )){
+            mkdir($CFG->dataroot.'/backups/'. $currentYear);
+        }
+        $backupFilePath = $CFG->dataroot.'/backups/'. $currentYear .'/'.quiz_attempt::create(current($attemptids))->get_quiz_name().'-'.$backupTime;
+        copy($tmp_zip_file, $backupFilePath. '.zip');
+
+        $requestFilePath = TrustedTimestamps::createRequestfile($backupFilePath . '.zip');
+        copy($requestFilePath,$backupFilePath.'.tsq');
+        $response = TrustedTimestamps::signRequestfile($requestFilePath, "http://zeitstempel.dfn.de");
+        $responseFile = fopen($backupFilePath. '.tsr', 'w+') or die("Unable to open file!");
+        fwrite($responseFile, json_encode($response));
+        fclose($responseFile);
+        $isValid = TrustedTimestamps::validate($backupFilePath . '.zip', $response['response_string'], $response['response_time'], $CFG->dirroot . '/blocks/signed_quiz_export/certs/dfn-cert.pem');
+
+
+
+
+        // Cleanup
+
+
+    }
+
+    function handle_sign($quiz_attempts){
+        $this->content->text = '<h1>'.'Sign Test'.'</h1>';
+        $tmp_zip_file = $this->prepareFiles(array_keys($quiz_attempts));
+        $this->export_attempts(array_keys($quiz_attempts),$tmp_zip_file);
+        unset($zip);
+        unlink($tmp_zip_file);
+        $quiz_info = $this->get_owning_activity();
+        $urltogo = new moodle_url('/mod/quiz/view.php', array('id' => $quiz_info->id));
+        redirect($urltogo);
+        
+    }
+    function handle_download($quiz_attempts){
+        //global $PAGE;
+        $this->content->text = '<h1>'.'Sign Download'.'</h1>';
+        header("Content-Type: application/zip");
+        header("Content-Disposition: attachment; filename=\"quiz_export.zip\"");
+        $tmp_zip_file = $this->prepareFiles(array_keys($quiz_attempts));
+        readfile($tmp_zip_file);
+        //$quiz_info = $this->get_owning_activity();
+        //$urltogo = new moodle_url('/mod/quiz/view.php', array('id' => $quiz_info->id));
+        //redirect($urltogo);
+        unset($zip);
+        unlink($tmp_zip_file);
+    }
+    function handle_end(){
+        $this->content->text = '<h1>'.'Sign end'.'</h1>';
     }
 }
