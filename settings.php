@@ -29,6 +29,6 @@ $settings->add(new admin_setting_heading('sampleheader',
                                          get_string('descconfig', 'block_signed_quiz_export')));
 
 $settings->add(new admin_setting_configtext('block_signed_quiz_export/tsdomain', get_string('tsdomain', 'block_signed_quiz_export'),
-    get_string('tsinfo', 'block_signed_quiz_export'), null, PARAM_TEXT));
+    get_string('tsinfo', 'block_signed_quiz_export'), 'http://zeitstempel.dfn.de', PARAM_TEXT));
 $settings->add(new admin_setting_configtext('block_signed_quiz_export/tscert', get_string('tscert', 'block_signed_quiz_export'),
-    get_string('tscertinfo', 'block_signed_quiz_export'), null, PARAM_TEXT));
+    get_string('tscertinfo', 'block_signed_quiz_export'), 'https://pki.pca.dfn.de/dfn-ca-global-g2/pub/cacert/chain.txt', PARAM_TEXT));
