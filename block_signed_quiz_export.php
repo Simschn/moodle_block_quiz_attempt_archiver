@@ -54,9 +54,16 @@ class block_signed_quiz_export extends block_base {
         }
         $cm = $this->get_owning_activity();
         //$PAGE->set_context(context_course::instance($cm->instance));
-        $quiz_attempts = $DB->get_records( 'quiz_attempts', array('quiz'=> $cm->instance));
+        try {
+            $quiz_attempts = $DB->get_records( 'quiz_attempts', array('quiz'=> $cm->instance));
+        } catch(Exception $e){
+            $this->content->text = '';
+            $this->content->footer = '';
+            return $this->content;
+        }
+
         $this->content = new stdClass();
-        $this->content->text = '<h1>'. json_encode($PAGE->cm) . '</h1>';
+        $this->content->text = '<h1>'. json_encode(quiz_attempt::create(current(array_keys($quiz_attempts)))->get_course()) . '</h1>';
         $this->content->footer = '<h3>'.json_encode($cm) .'</h3>';
         $mformSign = new block_form_sign($PAGE->url, array('id'=>$cm->id));
         $mformDownload = new block_form_download($PAGE->url,array('id'=>$cm->id));
@@ -147,7 +154,7 @@ class block_signed_quiz_export extends block_base {
 
     /**
      * Export the quiz attempts
-     * @param object $quiz the quiz settings.
+     * @param object $quiz the quiz settings
      * @param object $cm the course_module object.
      * @param array $attemptids the list of attempt ids to export.
      * @param array $allowed This list of userids that are visible in the report.
@@ -161,10 +168,11 @@ class block_signed_quiz_export extends block_base {
         $time = time(); // this will get you the current time in unix time format (seconds since 1/1/1970 GMT)
         $currentYear = userdate($time,'%Y');
         $backupTime = userdate($time, '%Y%m%d-%H%M'); // this will print the time in the timezone of the current user (formats)
-        if(!is_dir($CFG->dataroot.'/backups/'. $currentYear )){
-            mkdir($CFG->dataroot.'/backups/'. $currentYear);
+        $quizattempt = quiz_attempt::create(current($attemptids));
+        if(!is_dir($CFG->dataroot.'/backups/'. $currentYear . '/' . $quizattempt->get_quizid())){
+            mkdir($CFG->dataroot.'/backups/'. $currentYear . '/' . $quizattempt->get_quizid(), 0777, true);
         }
-        $backupFilePath = $CFG->dataroot.'/backups/'. $currentYear .'/'.quiz_attempt::create(current($attemptids))->get_quiz_name().'-'.$backupTime;
+        $backupFilePath = $CFG->dataroot.'/backups/'. $currentYear .'/'.$quizattempt->get_quizid() .'/'.$quizattempt->get_quiz_name().'-'.$backupTime;
         copy($tmp_zip_file, $backupFilePath. '.zip');
 
         $requestFilePath = TrustedTimestamps::createRequestfile($backupFilePath . '.zip');
@@ -174,12 +182,6 @@ class block_signed_quiz_export extends block_base {
         fwrite($responseFile, json_encode($response));
         fclose($responseFile);
         $isValid = TrustedTimestamps::validate($backupFilePath . '.zip', $response['response_string'], $response['response_time'], $CFG->dirroot . '/blocks/signed_quiz_export/certs/dfn-cert.pem');
-
-
-
-
-        // Cleanup
-
 
     }
 

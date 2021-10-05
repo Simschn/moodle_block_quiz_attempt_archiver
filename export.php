@@ -98,6 +98,7 @@ class quiz_export_engine
         foreach ($html_files as $file) {
             unlink($file);
         }
+        $this->setup_new_page();
         return $tmp_pdf_file;
     }
 
