@@ -52,8 +52,9 @@ class block_signed_quiz_export extends block_base {
         if ($this->content !== null) {
             return $this->content;
         }
+        $this->content = new stdClass();
         $cm = $this->get_owning_activity();
-        //$PAGE->set_context(context_course::instance($cm->instance));
+        $mformSign = new block_form_sign($PAGE->url, array('id'=>$cm->id));
         try {
             $quiz_attempts = $DB->get_records( 'quiz_attempts', array('quiz'=> $cm->instance));
         } catch(Exception $e){
@@ -62,26 +63,32 @@ class block_signed_quiz_export extends block_base {
             return $this->content;
         }
 
-        $this->content = new stdClass();
-        $this->content->text = '<h1>'. json_encode(quiz_attempt::create(current(array_keys($quiz_attempts)))->get_course()) . '</h1>';
-        $this->content->footer = '<h3>'.json_encode($cm) .'</h3>';
-        $mformSign = new block_form_sign($PAGE->url, array('id'=>$cm->id));
-        $mformDownload = new block_form_download($PAGE->url,array('id'=>$cm->id));
-        $mformEnd = new block_form_end($PAGE->url,array('id'=>$cm->id));
+        try{
+            $quiz_exports = $DB->get_records('block_signed_quiz_export', array('quizid' => $cm->instance));
+            $this->content->text = 'Download Quiz results:';
+            $this->content->text .= '<br>';
+            foreach($quiz_exports as $quiz_export){
+                $this->content->text .= html_writer::tag('a', 'Export from '. date("Y-m-d H:i:s",$quiz_export->sdate), array('href' => 'some_file.php'));
+                $this->content->text .= '<br>';
+            }
+        }catch(Exception $e){
 
-        if($mformDownload->get_data()){
+        }
+        //$this->content->footer = '<h3>'.json_encode($cm) .'</h3>';
+
+       /* if($mformDownload->get_data()){
             $this->handle_download($quiz_attempts);
             exit();
-        }
+        }*/
         if($mformSign->get_data()){
             $this->handle_sign($quiz_attempts);
         }
-        if($mformEnd->get_data()){
+       /* if($mformEnd->get_data()){
             $this->handle_end();
-        }
-        $this->content->text .= $mformEnd->render();
+        }*/
+        //$this->content->text .= $mformEnd->render();
         $this->content->text .= $mformSign->render();
-        $this->content->text .= $mformDownload->render();
+        //$this->content->text .= $mformDownload->render();
 
         return $this->content;
     }
@@ -151,8 +158,7 @@ class block_signed_quiz_export extends block_base {
         return $tmp_zip_file;
     }
 
-
-    /**
+/**
      * Export the quiz attempts
      * @param object $quiz the quiz settings
      * @param object $cm the course_module object.
@@ -164,7 +170,7 @@ class block_signed_quiz_export extends block_base {
      */
     function export_attempts($attemptids, $tmp_zip_file)
     {
-        global $CFG;
+        global $CFG,$DB,$USER;
         $time = time(); // this will get you the current time in unix time format (seconds since 1/1/1970 GMT)
         $currentYear = userdate($time,'%Y');
         $backupTime = userdate($time, '%Y%m%d-%H%M'); // this will print the time in the timezone of the current user (formats)
@@ -182,11 +188,16 @@ class block_signed_quiz_export extends block_base {
         fwrite($responseFile, json_encode($response));
         fclose($responseFile);
         $isValid = TrustedTimestamps::validate($backupFilePath . '.zip', $response['response_string'], $response['response_time'], $CFG->dirroot . '/blocks/signed_quiz_export/certs/dfn-cert.pem');
-
+        if($isValid) {
+            $DB->insert_record("block_signed_quiz_export",
+                ['teacherid' => $USER->id,
+                    'quizid' => $quizattempt->get_quizid(),
+                    'sdate' => $time,
+                    'path' => '/backups/' . $currentYear . '/' . $quizattempt->get_quizid() . '/' . $quizattempt->get_quiz_name() . '-' . $backupTime]);
+        }
     }
 
     function handle_sign($quiz_attempts){
-        $this->content->text = '<h1>'.'Sign Test'.'</h1>';
         $tmp_zip_file = $this->prepareFiles(array_keys($quiz_attempts));
         $this->export_attempts(array_keys($quiz_attempts),$tmp_zip_file);
         unset($zip);

@@ -4,15 +4,17 @@
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="block_signed_quiz_export" COMMENT="Default comment for block_signed_quiz_export, please edit me">
+    <TABLE NAME="signed_quiz_export" COMMENT="Default comment for block_signed_quiz_export, please edit me">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="path" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="path to backup file from moodle_data_root"/>
         <FIELD NAME="sdate" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="date of backup signing"/>
-        <FIELD NAME="teacherid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="id of teacher who signed the quiz result backup"/>
+        <FIELD NAME="teacherid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="quiz instance id"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="teacher" TYPE="foreign" FIELDS="teacherid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
   </TABLES>
