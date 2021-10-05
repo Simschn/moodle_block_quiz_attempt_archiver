@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-  <XMLDB PATH="blocks/signed_quiz_export/db" VERSION="20210928" COMMENT="XMLDB file for Moodle blocks/signed_quiz_export">
-    <TABLES>
-      <TABLE NAME="block_signed_quiz_export" COMMENT="Default comment for block_signed_quiz_export, please edit me">
-        <FIELDS>
-          <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
-        </FIELDS>
-        <KEYS>
-          <KEY NAME="primary" TYPE="primary" FIELDS="id" />
-        </KEYS>
-      </TABLE>
-    </TABLES>
-  </XMLDB>
+<XMLDB PATH="blocks/signed_quiz_export/db" VERSION="20211005" COMMENT="XMLDB file for Moodle blocks/signed_quiz_export"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="block_signed_quiz_export" COMMENT="Default comment for block_signed_quiz_export, please edit me">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="path" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="path to backup file from moodle_data_root"/>
+        <FIELD NAME="sdate" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="date of backup signing"/>
+        <FIELD NAME="teacherid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="id of teacher who signed the quiz result backup"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
