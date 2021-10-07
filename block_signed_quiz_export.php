@@ -68,7 +68,8 @@ class block_signed_quiz_export extends block_base {
             $this->content->text = 'Download Quiz results:';
             $this->content->text .= '<br>';
             foreach($quiz_exports as $quiz_export){
-                $this->content->text .= html_writer::tag('a', 'Export from '. date("Y-m-d H:i:s",$quiz_export->sdate), array('href' => 'some_file.php'));
+                $exportid = $quiz_export->id;
+                $this->content->text .= html_writer::tag('a', 'Export from '. date("Y-m-d H:i:s",$quiz_export->sdate), array('href' => '/blocks/signed_quiz_export/download_export.php?exportid='. $exportid));
                 $this->content->text .= '<br>';
             }
         }catch(Exception $e){
