@@ -399,8 +399,11 @@ class quiz_export_engine
             file_put_contents($cookieFile, "MoodleSession=" . $_COOKIE['MoodleSession']);
             // Without that we have to wait the script eneded to load images => time out
             session_write_close();
-            foreach ($matches[1] as $match) {
-                $ch = curl_init($match);
+            $uniqMatches = array_unique($matches[1]);
+            foreach ($uniqMatches as $match) {
+                $parsedmatch = preg_replace('/https/', '/http/', $match);
+                $parsedmatch = preg_replace('/'. preg_quote($_SERVER['SERVER_NAME']). '/', 'localhost', $parsedmatch);
+                $ch = curl_init($parsedmatch);
                 $strCookie = session_name() . '=' . $_COOKIE[session_name()] . '; path=/';
                 curl_setopt($ch, CURLOPT_COOKIE, $strCookie);
                 curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -416,7 +419,8 @@ class quiz_export_engine
                 $matches_content[] = "data:" . $mimeType . ";base64," . base64_encode($result);
                 curl_close($ch);
             }
-            $html = str_replace($matches[1], $matches_content, $html);
+            $html = str_replace($uniqMatches, $matches_content, $html);
+            $html = preg_replace('/https:\/\/' . preg_quote($_SERVER['SERVER_NAME']). '\//', 'http://localhost/', $html);
         }
         return $html;
     }
