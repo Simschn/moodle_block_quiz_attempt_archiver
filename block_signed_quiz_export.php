@@ -23,13 +23,6 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-//require_once($CFG->dirroot . '/mod/quiz/locallib.php');
-//require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport.php');
-//require_once($CFG->dirroot . '/mod/quiz/report/export/export_form.php');
-//require_once($CFG->dirroot . '/mod/quiz/report/export/export_options.php');
-//require_once($CFG->dirroot . '/mod/quiz/report/export/export_table.php');
-//require_once($CFG->dirroot . '/mod/quiz/report/export/export.php');
-
 require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/forms/block_form_download.php');
 require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/forms/block_form_sign.php');
 require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/forms/block_form_end.php');
@@ -53,18 +46,18 @@ class block_signed_quiz_export extends block_base {
             return $this->content;
         }
         $this->content = new stdClass();
+        $this->content->text = '';
+        $this->content->footer = '';
         $cm = $this->get_owning_activity();
         $mformSign = new block_form_sign($PAGE->url, array('id'=>$cm->id));
         try {
             $quiz_attempts = $DB->get_records( 'quiz_attempts', array('quiz'=> $cm->instance));
         } catch(Exception $e){
-            $this->content->text = '';
-            $this->content->footer = '';
             return $this->content;
         }
 
         try{
-            $quiz_exports = $DB->get_records('block_signed_quiz_export', array('quizid' => $cm->instance));
+            $quiz_exports = $DB->get_records('signed_quiz_export', array('quizid' => $cm->instance));
             $this->content->text = 'Download Quiz results:';
             $this->content->text .= '<br>';
             foreach($quiz_exports as $quiz_export){
@@ -132,11 +125,11 @@ class block_signed_quiz_export extends block_base {
     }
 
     function prepareFiles($attemptids){
-        global $DB;
+        global $DB, $CFG;
         $pdf_files = array();
         $exporter = new quiz_export_engine();
 
-        $tmp_dir = sys_get_temp_dir();
+        $tmp_dir = '/tmp/';
         $tmp_file = tempnam($tmp_dir, "mdl-qexp_");
         $tmp_zip_file = $tmp_file . ".zip";
         rename($tmp_file, $tmp_zip_file);
@@ -190,7 +183,7 @@ class block_signed_quiz_export extends block_base {
         fclose($responseFile);
         $isValid = TrustedTimestamps::validate($backupFilePath . '.zip', $response['response_string'], $response['response_time'], $CFG->dirroot . '/blocks/signed_quiz_export/certs/dfn-cert.pem');
         if($isValid) {
-            $DB->insert_record("block_signed_quiz_export",
+            $DB->insert_record("signed_quiz_export",
                 ['teacherid' => $USER->id,
                     'quizid' => $quizattempt->get_quizid(),
                     'sdate' => $time,

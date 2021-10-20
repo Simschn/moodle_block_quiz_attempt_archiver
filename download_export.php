@@ -28,7 +28,7 @@ require_once($CFG->dirroot . '/lib/moodlelib.php');
 
 $exportid = required_param('exportid', PARAM_INT);
 
-$quiz_exports = $DB->get_records('block_signed_quiz_export', array('id' => $exportid));
+$quiz_exports = $DB->get_records('signed_quiz_export', array('id' => $exportid));
 $filepath = $CFG->dataroot . current($quiz_exports)->path . '.zip';
 echo $filepath;
 header("Content-Type: application/zip");

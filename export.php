@@ -51,9 +51,8 @@ class quiz_export_engine
     public function a2pdf($attemptobj)
     {
         global $CFG;
-        $parameters_additionnal_informations = $this->get_additionnal_informations($attemptobj);
-
-        $tmp_dir = $CFG->dataroot . '/mpdf';
+        $attempt_info = $this->get_additionnal_informations($attemptobj);
+        $tmp_dir = '/tmp/mpdf';
         ob_start();
         $tmp_file = tempnam($tmp_dir, "mdl-qexp_");
         ob_get_clean();
@@ -72,28 +71,42 @@ class quiz_export_engine
         ]);
 
         // Start output buffering html
-        ob_start();
-        include __DIR__ . '/style/styles.css';
-        $css = ob_get_clean();
-        $pdf->WriteHTML($css, HTMLParserMode::HEADER_CSS);
-
         $additionnal_informations = '<h3 class="text-center" style="margin-bottom: -20px;">' .
-            get_string('documenttitle', 'block_signed_quiz_export') .
+            get_string('documenttitle', 'block_signed_quiz_export', ['coursename' => $attemptobj->get_course()->fullname, 'quizname' => $attemptobj->get_quiz_name()]) .
             '</h3>';
 
-        $html_files = $this->all_questions($attemptobj);
+        $html_files = $this->question_per_page($attemptobj);
+        $current_page = 0;
+        foreach ($html_files as $html_file) {
+            // Start output buffering html
+            ob_start();
+            include __DIR__ . '/style/styles.css';
+            include __DIR__ . '/style/moodlesimple.css';
+            $css = ob_get_clean();
+            $pdf->WriteHTML($css, \Mpdf\HTMLParserMode::HEADER_CSS);
 
-        // Start output buffering html
-        ob_start();
-        include $html_files[0];
-        $contentHTML = ob_get_clean();
-        $contentHTML = preg_replace("/<input type=\"text\".+?value=\"/", ' - ', $contentHTML);
-        $contentHTML = preg_replace("/\" id=\"q.+?readonly\"(>| \/>)/", ' - ', $contentHTML);
+            // Start output buffering html
+            ob_start();
+            include $html_file;
+            $contentHTML = ob_get_clean();
+            $contentHTML = preg_replace('/<script(.*?)>(.*?)<\/script>/is', '', $contentHTML);
+            $contentHTML = preg_replace('/<span(.*?)feedbackspan(.*?)>(.*?)<\/script>/is', '', $contentHTML);
+            $contentHTML = preg_replace('/visibleifjs/', '', $contentHTML);
+            $contentHTML = preg_replace('/<td class="control correct hiddenifjs">(.*?)<\/td>/', '', $contentHTML);
+            $contentHTML = preg_replace('/<link(.*)?\/>/', '', $contentHTML);
+            if ($current_page == 0) {
+                $pdf->WriteHTML($this->preloadImageWithCurrentSession($additionnal_informations), \Mpdf\HTMLParserMode::HTML_BODY);
+            }
+            $pdf->WriteHTML($this->preloadImageWithCurrentSession($contentHTML), \Mpdf\HTMLParserMode::DEFAULT_MODE);
 
-        $pdf->WriteHTML($this->preloadImageWithCurrentSession($additionnal_informations), HTMLParserMode::HTML_BODY);
-        $pdf->WriteHTML($this->preloadImageWithCurrentSession($contentHTML), HTMLParserMode::DEFAULT_MODE);
+            if (!$attemptobj->is_last_page($current_page)) {
+                $pdf->AddPage();
+            }
+            $current_page++;
+        }
         $pdf->Output($tmp_pdf_file, Destination::FILE);
-         //Cleanup
+
+        //Cleanup
         unlink($tmp_err_file);
         foreach ($html_files as $file) {
             unlink($file);
@@ -102,30 +115,36 @@ class quiz_export_engine
         return $tmp_pdf_file;
     }
 
-    /**
-     * Generate the html of all quiz questions
-     * Used with "PAGEMODE_SINGLEPAGE" page mode
-     *
-     * @param $attemptobj
-     * @return string[]
-     */
-    protected function all_questions($attemptobj)
+    protected function question_per_page($attemptobj)
     {
-        $slots = $attemptobj->get_slots();
-        $showall = true;
-        $lastpage = true;
-        $page = 0;
+        $tmp_html_files = array();
+        $showall = false;
+        $num_pages = $attemptobj->get_num_pages();
 
-        $tmp_dir = sys_get_temp_dir();
-        $tmp_file = tempnam($tmp_dir, "mdl-qexp_");
-        $tmp_html_file = $tmp_file . ".html";
-        rename($tmp_file, $tmp_html_file);
-        chmod($tmp_html_file, 0644);
+        for ($page = 0; $page < $num_pages; $page++) {
+            $questionids = $attemptobj->get_slots($page);
+            $lastpage = $attemptobj->is_last_page($page);
 
-        $output = $this->get_review_html($attemptobj, $slots, $page, $showall, $lastpage);
-        file_put_contents($tmp_html_file, $output);
+            foreach ($questionids as $questionid) {
+                // We have just one question id but an array is required from render function
+                $slots = array();
+                $slots[] = $questionid;
 
-        return array($tmp_html_file);
+                $tmp_dir = sys_get_temp_dir();
+                $tmp_file = tempnam($tmp_dir, "mdl-qexp_");
+                $tmp_html_file = $tmp_file . ".html";
+                rename($tmp_file, $tmp_html_file);
+                chmod($tmp_html_file, 0644);
+
+                $output = $this->get_review_html($attemptobj, $slots, $page, $showall, $lastpage);
+
+                file_put_contents($tmp_html_file, $output);
+
+                $tmp_html_files[] = $tmp_html_file;
+            }
+        }
+
+        return $tmp_html_files;
     }
 
     /**
