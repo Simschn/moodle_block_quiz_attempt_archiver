@@ -29,8 +29,7 @@ require_once($CFG->dirroot . '/lib/moodlelib.php');
 $exportid = required_param('exportid', PARAM_INT);
 
 $quiz_exports = $DB->get_records('signed_quiz_export', array('id' => $exportid));
-$filepath = $CFG->dataroot . current($quiz_exports)->path . '.zip';
-echo $filepath;
+$filepath = $CFG->dataroot . current($quiz_exports)->path;
 header("Content-Type: application/zip");
 $filepath_parts = explode('/', $filepath);
 header("Content-Disposition: attachment; filename=\"".end($filepath_parts));

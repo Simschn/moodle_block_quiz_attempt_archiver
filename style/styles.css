@@ -116,7 +116,7 @@ body, html, * {
 .que.multichoice .answer div.r0,
 .que.multichoice .answer div.r1 {
     padding: .3em 0 .3em 25px;
-    text-indent: -25px;
+    display: flex;
 }
 
 .que.multichoice .answer div.r0 label,

@@ -169,10 +169,11 @@ class block_signed_quiz_export extends block_base {
         $currentYear = userdate($time,'%Y');
         $backupTime = userdate($time, '%Y%m%d-%H%M'); // this will print the time in the timezone of the current user (formats)
         $quizattempt = quiz_attempt::create(current($attemptids));
-        if(!is_dir($CFG->dataroot.'/backups/'. $currentYear . '/' . $quizattempt->get_quizid())){
-            mkdir($CFG->dataroot.'/backups/'. $currentYear . '/' . $quizattempt->get_quizid(), 0777, true);
+        $backupPath = $CFG->dataroot.'/backups/'. $currentYear . '/' . $quizattempt->get_course()->fullname . '/' . $quizattempt->get_quiz_name();
+        if(!is_dir($backupPath)){
+            mkdir($backupPath, 0777, true);
         }
-        $backupFilePath = $CFG->dataroot.'/backups/'. $currentYear .'/'.$quizattempt->get_quizid() .'/'.$quizattempt->get_quiz_name().'-'.$backupTime;
+        $backupFilePath =  $backupPath . '/' . $backupTime;
         copy($tmp_zip_file, $backupFilePath. '.zip');
 
         $requestFilePath = TrustedTimestamps::createRequestfile($backupFilePath . '.zip');
@@ -187,7 +188,7 @@ class block_signed_quiz_export extends block_base {
                 ['teacherid' => $USER->id,
                     'quizid' => $quizattempt->get_quizid(),
                     'sdate' => $time,
-                    'path' => '/backups/' . $currentYear . '/' . $quizattempt->get_quizid() . '/' . $quizattempt->get_quiz_name() . '-' . $backupTime]);
+                    'path' => '/backups/' . $currentYear . '/' . $quizattempt->get_course()->fullname . '/' . $quizattempt->get_quiz_name() . '/' . $backupTime . '.zip']);
         }
     }
 

@@ -89,10 +89,16 @@ class quiz_export_engine
             ob_start();
             include $html_file;
             $contentHTML = ob_get_clean();
+           // $contentHTML = preg_replace('/(<div class="r[0-9]">)(<input.*>)(<div.*>)(<span.*>)(<div.*>)(<p>)(.*)(<\/p>)(<\/div>)(<\/div>).(<\/div>)/U', '$1 $2 $3 $4 <span>  $7  </span> $9 $10', $contentHTML);
+           // $contentHTML = preg_replace('/(<div class="r[0-9]">)(<input.*>)(<div.*>)(<span class="answernumber">)(.*)(<\/span>)(<div.*>)(<p>)(.*)(<\/p>)(<\/div>)(<\/div>).(<\/div>)/U', '$1 $2 <span> $5 $7 </span> $9 $10', $contentHTML);
+           // $contentHTML = preg_replace('/(<div class="r[0-9].*">)(<input.*\/>)(<div.*>)(<span class="answernumber">)(.*)(<\/span>)(<div.*>)(<p.*>)(.*)(<\/p>)(<\/div>)(<\/div>)/U', '$1 $2 <span> $5 $9 </span> $11 $12', $contentHTML);
+            $contentHTML = preg_replace('/(<div class="r[0-9].*">)(<input.*\/>)(<div.*>)(<span class="answernumber">)(.*)(<\/span>)(<div.*>)(<p.*>)(.*)<br>(<\/p>)(<\/div>)(<\/div>)/U', '$1 $2 <span> $5 $9 </span>', $contentHTML);
+            $contentHTML = preg_replace('/<span[^>]*accesshide.*>.*<\/span>/U', '', $contentHTML);
+            $contentHTML = preg_replace('/size="[0-9]"/', 'size="10"', $contentHTML);
             $contentHTML = preg_replace('/<script(.*?)>(.*?)<\/script>/is', '', $contentHTML);
-            $contentHTML = preg_replace('/<span(.*?)feedbackspan(.*?)>(.*?)<\/script>/is', '', $contentHTML);
             $contentHTML = preg_replace('/visibleifjs/', '', $contentHTML);
             $contentHTML = preg_replace('/<td class="control correct hiddenifjs">(.*?)<\/td>/', '', $contentHTML);
+            $contentHTML = preg_replace('/<span class="feedbackspan accesshide"(.*)?>(.*)?<\/span>$/is', '', $contentHTML);
             $contentHTML = preg_replace('/<link(.*)?\/>/', '', $contentHTML);
             if ($current_page == 0) {
                 $pdf->WriteHTML($this->preloadImageWithCurrentSession($additionnal_informations), \Mpdf\HTMLParserMode::HTML_BODY);
@@ -135,7 +141,7 @@ class quiz_export_engine
                 $tmp_html_file = $tmp_file . ".html";
                 rename($tmp_file, $tmp_html_file);
                 chmod($tmp_html_file, 0644);
-
+                //have quiz summeray on every page as head
                 $output = $this->get_review_html($attemptobj, $slots, $page, $showall, $lastpage);
 
                 file_put_contents($tmp_html_file, $output);
@@ -205,7 +211,7 @@ class quiz_export_engine
         // Fool out mod_quiz renderer:
         // 		set $page = 0 for showing comple summary table on every page
         // 			side effect: breaks next page links
-        return $output->review_page($attemptobj, $slots, $page, $showall, $lastpage, $options, $summarydata);
+        return $output->review_page($attemptobj, $slots, 0, $showall, $lastpage, $options, $summarydata);
     }
 
     /**
@@ -390,6 +396,7 @@ class quiz_export_engine
      */
     protected function preloadImageWithCurrentSession($html)
     {
+        global $CFG;
         $matches = [];
         $matches_content = [];
         preg_match_all("/<img.*src=\"(https?:\/\/.*)\".*>/U", $html, $matches);
@@ -401,7 +408,7 @@ class quiz_export_engine
             session_write_close();
             $uniqMatches = array_unique($matches[1]);
             foreach ($uniqMatches as $match) {
-                $parsedmatch = preg_replace('/https/', '/http/', $match);
+                $parsedmatch = preg_replace('/https/', 'http', $match);
                 $parsedmatch = preg_replace('/'. preg_quote($_SERVER['SERVER_NAME']). '/', 'localhost', $parsedmatch);
                 $ch = curl_init($parsedmatch);
                 $strCookie = session_name() . '=' . $_COOKIE[session_name()] . '; path=/';
