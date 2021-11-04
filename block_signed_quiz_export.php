@@ -63,6 +63,11 @@ class block_signed_quiz_export extends block_base {
             foreach($quiz_exports as $quiz_export){
                 $exportid = $quiz_export->id;
                 $this->content->text .= html_writer::tag('a', 'Export from '. date("Y-m-d H:i:s",$quiz_export->sdate), array('href' => '/blocks/signed_quiz_export/download_export.php?exportid='. $exportid));
+                if($quiz_export->valid) {
+                    $this->content->text .= '<i class="fa fa-check"></i>';
+                } else {
+                    $this->content->text .= '<i class="fa fa-times"></i>';
+                }
                 $this->content->text .= '<br>';
             }
         }catch(Exception $e){
@@ -178,18 +183,17 @@ class block_signed_quiz_export extends block_base {
 
         $requestFilePath = TrustedTimestamps::createRequestfile($backupFilePath . '.zip');
         copy($requestFilePath,$backupFilePath.'.tsq');
-        $response = TrustedTimestamps::signRequestfile($requestFilePath, "http://zeitstempel.dfn.de");
+        $response = TrustedTimestamps::signRequestfile($requestFilePath, get_config('block_signed_quiz_export', 'tsdomain'));
         $responseFile = fopen($backupFilePath. '.tsr', 'w+') or die("Unable to open file!");
-        fwrite($responseFile, json_encode($response));
+        fwrite($responseFile, $response);
         fclose($responseFile);
-        $isValid = TrustedTimestamps::validate($backupFilePath . '.zip', $response['response_string'], $response['response_time'], $CFG->dirroot . '/blocks/signed_quiz_export/certs/dfn-cert.pem');
-        if($isValid) {
-            $DB->insert_record("signed_quiz_export",
-                ['teacherid' => $USER->id,
-                    'quizid' => $quizattempt->get_quizid(),
-                    'sdate' => $time,
-                    'path' => '/backups/' . $currentYear . '/' . $quizattempt->get_course()->fullname . '/' . $quizattempt->get_quiz_name() . '/' . $backupTime . '.zip']);
-        }
+        $isValid = TrustedTimestamps::validate($backupFilePath, $CFG->dirroot . '/blocks/signed_quiz_export/certs/dfn-cert.pem');
+        $DB->insert_record("signed_quiz_export",
+            ['teacherid' => $USER->id,
+                'quizid' => $quizattempt->get_quizid(),
+                'sdate' => $time,
+                'path' => '/backups/' . $currentYear . '/' . $quizattempt->get_course()->fullname . '/' . $quizattempt->get_quiz_name() . '/' . $backupTime . '.zip',
+        'valid' => $isValid]);
     }
 
     function handle_sign($quiz_attempts){

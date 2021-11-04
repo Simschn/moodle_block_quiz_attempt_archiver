@@ -11,6 +11,7 @@
         <FIELD NAME="sdate" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="date of backup signing"/>
         <FIELD NAME="teacherid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="quiz instance id"/>
+        <FIELD NAME="valid" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="report is validated by rfc3161"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

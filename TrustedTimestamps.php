@@ -51,7 +51,7 @@ class TrustedTimestamps
      *
      * @param string $requestfile_path: The path to the Timestamp Requestfile as created by createRequestfile
      * @param string $tsa_url: URL of a TSA such as http://zeitstempel.dfn.de
-     * @return array of response_string with the unix-timetamp of the timestamp response and the base64-encoded response_string
+     * @return string $binary_response_string
      */
     public static function signRequestfile ($requestfile_path, $tsa_url)
     {
@@ -74,12 +74,11 @@ class TrustedTimestamps
         if ($status != 200 || !strlen($binary_response_string))
             throw new Exception("The request failed");
 
-        $base64_response_string = base64_encode($binary_response_string);
+        //$base64_response_string = base64_encode($binary_response_string);
 
-        $response_time = self::getTimestampFromAnswer ($base64_response_string);
+        //$response_time = self::getTimestampFromAnswer ($base64_response_string);
 
-        return array("response_string" => $base64_response_string,
-            "response_time" => $response_time);
+        return $binary_response_string;
     }
 
     /**
@@ -135,51 +134,16 @@ class TrustedTimestamps
      * @param string $tsa_cert_file: The path to the TSAs certificate chain (e.g. https://pki.pca.dfn.de/global-services-ca/pub/cacert/chain.txt)
      * @return <type>
      */
-    public static function validate ($filepath, $base64_response_string, $response_time, $tsa_cert_file)
+    public static function validate ($filepath, $tsa_cert_file)
     {
-        $binary_response_string = base64_decode($base64_response_string);
-
-        if (!strlen($binary_response_string))
-            throw new Exception("There was no response-string");
-
-        if (!intval($response_time))
-            throw new Exception("There is no valid response-time given");
-
-        if (!file_exists($tsa_cert_file))
-            throw new Exception("The TSA-Certificate could not be found");
-
-        $responsefile = self::createTempFile($binary_response_string);
-
-        $cmd = "openssl ts -verify -data ".escapeshellarg($filepath)." -in ".escapeshellarg($responsefile)." -CAfile ".escapeshellarg($tsa_cert_file);
+        global $CFG;
+        $cmd = "openssl ts -verify -data ".escapeshellarg($filepath .'.zip')." -in ".escapeshellarg($filepath. '.tsr')." -CAfile ".escapeshellarg($tsa_cert_file);
 
         $retarray = array();
         exec($cmd." 2>&1", $retarray, $retcode);
-
-        /*
-         * just 2 "normal" cases:
-         *     1) Everything okay -> retcode 0 + retarray[0] == "Verification: OK"
-         *  2) Hash is wrong -> retcode 1 + strpos(retarray[somewhere], "message imprint mismatch") !== false
-         *
-         * every other case (Certificate not found / invalid / openssl is not installed / ts command not known)
-         * are being handled the same way -> retcode 1 + any retarray NOT containing "message imprint mismatch"
-         */
-
-        //todo check all array elements for verification message
-        if ($retcode === 0 && strtolower(trim($retarray[1])) == "verification: ok")
-        {
-            if (self::getTimestampFromAnswer ($base64_response_string) != $response_time)
-                throw new Exception("The responsetime of the request was changed");
-
-            return true;
-        }
-
-        foreach ($retarray as $retline)
-        {
-            if (stripos($retline, "message imprint mismatch") !== false)
-                return false;
-        }
-
-        throw new Exception('Verification failed: '. implode(', ', $retarray));
+        $verification_result = fopen($CFG->dataroot.'/backups/verification','w+');
+        fwrite($verification_result, json_encode($retarray));
+        return preg_match('/Verification: OK/',implode('\n', $retarray));
     }
 
     /**
