@@ -73,22 +73,11 @@ class block_signed_quiz_export extends block_base {
         }catch(Exception $e){
 
         }
-        //$this->content->footer = '<h3>'.json_encode($cm) .'</h3>';
 
-       /* if($mformDownload->get_data()){
-            $this->handle_download($quiz_attempts);
-            exit();
-        }*/
         if($mformSign->get_data()){
             $this->handle_sign($quiz_attempts);
         }
-       /* if($mformEnd->get_data()){
-            $this->handle_end();
-        }*/
-        //$this->content->text .= $mformEnd->render();
         $this->content->text .= $mformSign->render();
-        //$this->content->text .= $mformDownload->render();
-
         return $this->content;
     }
 
