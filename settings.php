@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Newblock block caps.
+ * Signed quiz export block settings
  *
- * @package    block_newblock
- * @copyright  Daniel Neis <danielneis@gmail.com>
+ * @package    signed_quiz_export
+ * @copyright  Simon Schniedenharn 2021
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

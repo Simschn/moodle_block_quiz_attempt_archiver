@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>vendor/mpdf/mpdf</location>
+        <name>mpdf</name>
+        <version>^8.0</version>
+        <license>GPL</license>
+        <licenseversion>2</licenseversion>
+    </library>
+</libraries>

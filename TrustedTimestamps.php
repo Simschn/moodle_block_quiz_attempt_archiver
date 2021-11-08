@@ -1,23 +1,13 @@
 <?php
 /**
  * TrustedTimestamps.php - Creates Timestamp Requestfiles, processes the request at a Timestamp Authority (TSA) after RFC 3161
- *
  * Released under the MIT license (opensource.org/licenses/MIT) Copyright (c) 2015 David Müller
- *
  * bases on OpenSSL and RFC 3161: http://www.ietf.org/rfc/rfc3161.txt
- *
- * WARNING:
- *     needs openssl ts, which is availible in OpenSSL versions >= 0.99
- *     This is currently (2011-03-02) not the case in Debian
- *     (see http://stackoverflow.com/questions/5043393/openssl-ts-command-not-working-trusted-timestamps)
- *     -> Possibility: Debian Experimentals -> http://wiki.debian.org/DebianExperimental
- *
- * For OpenSSL on Windows, see
- *     http://www.slproweb.com/products/Win32OpenSSL.html
- *     http://www.switch.ch/aai/support/howto/openssl-windows.html
- *
- * @version 0.3
- * @author David Müller
+
+ * @author Simon Schniedenharn
+ * @copyright Simon Schniedenharn
+ * @copyright based on work by David Müller 2015
+ * @note The original File was heavily changed for it to work in the context of Moodle
  * @package trustedtimestamps
  */
 

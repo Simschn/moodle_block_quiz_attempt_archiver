@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Verpackt die Dateien und Verzeichnisse eines Kurses in einer .zip-Datei und sendet sie dem Browser zum Downloaden
+ * This file will return a Zip containing all Quiz results as individual PDFs per person
  *
- * @package    block_material_download
- * @copyright  2013 onwards Paola Frignani, TH Ingolstadt
+ * @package    block_signed_quiz_export
+ * @copyright  Simon Schniedenharn 2021
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

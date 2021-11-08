@@ -18,8 +18,10 @@
  * This file defines the export engine class.
  *
  * @package   quiz_export
- * @copyright 2020 CBlue Srl
+ * @copyright Simon Schniedenharn 2021
+ * @copyright based on Work by 2020 CBlue Srl
  * @copyright based on work by 2014 Johannes Burk
+ * @note      Changes to the original file to better fit into the context of a block and updates to the result renderings
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,14 +33,6 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-/**
- * Quiz export engine class.
- *
- * @package   quiz_export
- * @copyright 2020 CBlue Srl
- * @copyright based on work by 2014 Johannes Burk
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 class quiz_export_engine
 {
     /**

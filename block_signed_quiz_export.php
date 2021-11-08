@@ -15,11 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Signed Quiz Export
+ *  Moodle Block Plugin Main file
  *
- * @package    block_signed_quiz_export
- * @copyright  Daniel Neis <danielneis@gmail.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package  signed quiz export
+ * @copyright 2021 Simon Schniedenharn
+ * @copyright based on work by 2020 CBlue Srl
+ * @copyright based on work by 2014 Johannes Burk
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
 
