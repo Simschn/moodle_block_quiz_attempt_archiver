@@ -18,7 +18,7 @@ This Plugin can only be added to Quiz Activity instances. It will then Display a
 ### Settings
 For the Plugin to work there are two fields to be set. The first is the Url of a valid rfc3161 compliant Server and a Url to the Certificate Chain needed to verify a timestamping response file.
 
-###Copyright
+### Copyright
 This plugin is based on (https://github.com/cbluesprl/moodle-quiz_export) which itself is
 based on https://github.com/elccHTWBerlin/moodle-quiz-export. It has been modified into the form of a Block Plugin
 and uses an added timestamping mechanism for revision safe storing.
