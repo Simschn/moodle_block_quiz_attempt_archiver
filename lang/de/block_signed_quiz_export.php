@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-$string['blockstring'] = 'Block string';
-$string['descconfig'] = 'Description of the config section';
-$string['descfoo'] = 'Config description';
-$string['headerconfig'] = 'Config section header';
-$string['labelfoo'] = 'Config label';
-$string['newblock:addinstance'] = 'Add a newblock block';
-$string['pluginname'] = 'Signed Quiz Export';
-$string['buttonend'] = 'End Quiz';
-$string['buttonsign'] = 'Save Signed Quiz Results';
-$string['buttondownload'] = 'Download Quiz Results';
+$string['descconfig'] = 'Bitte geben sie die Urls zu ihrem Zeitstempel Server an';
+$string['headerconfig'] = 'Zeitstempel Server Urls';
+$string['signed_quiz_export:addinstance'] = 'Füge einen neuen block zur revisionssicheren Speicherung hinzu';
+$string['pluginname'] = 'Revisionssicherer Quiz Export';
+$string['buttonsign'] = 'Signieren und speichern';
+$string['documenttitle'] = '{$a->coursename} - {$a->quizname}';
+$string['tsdomain'] = 'Zeitstempel Server';
+$string['tsinfo'] = 'Wählen sie einen Server für den rfc3161 Signaturprozess aus';
+$string['tscert'] = 'Zertifikatskette des Zeitstempelservers';
+$string['tscertinfo'] = 'Setzen sie eine Url zur Zertifikatskette des Signierenden Servers ';

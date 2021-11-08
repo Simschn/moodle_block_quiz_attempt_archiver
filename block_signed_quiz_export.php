@@ -23,9 +23,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/forms/block_form_download.php');
 require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/forms/block_form_sign.php');
-require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/forms/block_form_end.php');
 require_once($CFG->dirroot . '/blocks/signed_quiz_export/export.php');
 require_once($CFG->dirroot . '/blocks/signed_quiz_export/TrustedTimestamps.php');
 
@@ -75,9 +73,9 @@ class block_signed_quiz_export extends block_base {
         }
 
         if($mformSign->get_data()){
-            $this->handle_sign($quiz_attempts);
+            $this->sign($quiz_attempts);
         }
-        $this->content->text .= $mformSign->render();
+        $this->content->footer .= $mformSign->render();
         return $this->content;
     }
 
@@ -185,7 +183,7 @@ class block_signed_quiz_export extends block_base {
         'valid' => $isValid]);
     }
 
-    function handle_sign($quiz_attempts){
+    function sign($quiz_attempts){
         $tmp_zip_file = $this->prepareFiles(array_keys($quiz_attempts));
         $this->export_attempts(array_keys($quiz_attempts),$tmp_zip_file);
         unset($zip);
@@ -194,21 +192,5 @@ class block_signed_quiz_export extends block_base {
         $urltogo = new moodle_url('/mod/quiz/view.php', array('id' => $quiz_info->id));
         redirect($urltogo);
         
-    }
-    function handle_download($quiz_attempts){
-        //global $PAGE;
-        $this->content->text = '<h1>'.'Sign Download'.'</h1>';
-        header("Content-Type: application/zip");
-        header("Content-Disposition: attachment; filename=\"quiz_export.zip\"");
-        $tmp_zip_file = $this->prepareFiles(array_keys($quiz_attempts));
-        readfile($tmp_zip_file);
-        //$quiz_info = $this->get_owning_activity();
-        //$urltogo = new moodle_url('/mod/quiz/view.php', array('id' => $quiz_info->id));
-        //redirect($urltogo);
-        unset($zip);
-        unlink($tmp_zip_file);
-    }
-    function handle_end(){
-        $this->content->text = '<h1>'.'Sign end'.'</h1>';
     }
 }

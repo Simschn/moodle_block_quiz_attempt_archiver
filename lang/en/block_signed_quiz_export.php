@@ -15,16 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-$string['blockstring'] = 'Block string';
-$string['descconfig'] = 'Description of the config section';
-$string['descfoo'] = 'Config description';
-$string['headerconfig'] = 'Config section header';
-$string['labelfoo'] = 'Config label';
-$string['signed_quiz_export:addinstance'] = 'Add a newblock block';
+$string['descconfig'] = 'Urls for the timestamping Service';
+$string['headerconfig'] = 'Time stamping Urls';
+$string['signed_quiz_export:addinstance'] = 'Add a signed quiz export block';
 $string['pluginname'] = 'Signed Quiz Export';
-$string['buttonend'] = 'End Quiz';
-$string['buttonsign'] = 'Save Signed Quiz Results';
-$string['buttondownload'] = 'Download Quiz Results';
+$string['buttonsign'] = 'Sign and Save';
 $string['documenttitle'] = '{$a->coursename} - {$a->quizname}';
 $string['tsdomain'] = 'Timestamp Server';
 $string['tsinfo'] = 'Select a server to be used for the rfc3161 signing process';

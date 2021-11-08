@@ -12,7 +12,8 @@ class block_form_sign extends moodleform {
         global $CFG;
 
         $mform = $this->_form; // Don't forget the underscore
-        $this->add_action_buttons(false, get_string('buttonsign','block_signed_quiz_export'));
+        $mform->addElement('submit', 'signbutton', get_string('buttonsign','block_signed_quiz_export'));
+        $mform->closeHeaderBefore('signbutton');
         $mform->setDefault('id',$this->_customdata['id']);
     }
     //Custom validation should be added here
