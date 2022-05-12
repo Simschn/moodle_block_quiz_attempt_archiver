@@ -1,24 +1,29 @@
 {
-    "name": "simschn20/signed_quiz_export_block",
-    "description": "",
-    "license": "GPLv3",
-    "authors": [
-        {
-            "name": "Simon Schniedenharn",
-            "email": "simon.schniedenharn@mni.thm.de"
-        }
-    ],
-    "type": "moodle-block",
-    "require": {
-      "composer/installers": "~1.0",
-        "mpdf/mpdf": "^8.0",
-        "ext-curl": "*",
-        "ext-json": "*"
-    },
-    "require-dev": {
-        "moodle/moodle": "3.11"
-    },
-    "extra": {
-      "installer-name": "signed quiz export"
+  "name": "simschn20/signed_quiz_export_block",
+  "description": "",
+  "license": "GPLv3",
+  "authors": [
+    {
+      "name": "Simon Schniedenharn",
+      "email": "simon.schniedenharn@mni.thm.de"
     }
+  ],
+  "type": "moodle-block",
+  "require": {
+    "composer/installers": "~1.0",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "mikehaertl/phpwkhtmltopdf": "^2.5"
+  },
+  "require-dev": {
+    "moodle/moodle": "3.11"
+  },
+  "extra": {
+    "installer-name": "signed quiz export"
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true
+    }
+  }
 }

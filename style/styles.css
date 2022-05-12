@@ -2617,3 +2617,9 @@ button.bg-gray:hover,
 button.bg-gray:focus {
     background-color: #cbd3da !important;
 }
+
+.r0, .r1 {
+	display: flex;
+	margin: .25rem 0;
+	align-items: flex-start;
+}
