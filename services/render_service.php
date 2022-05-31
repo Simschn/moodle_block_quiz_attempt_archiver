@@ -29,9 +29,9 @@ use mikehaertl\wkhtmlto\Pdf;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-class quiz_export_engine
+class render_service
 {
   /**
    * Exports the given quiz attempt to a pdf file.
@@ -40,27 +40,25 @@ class quiz_export_engine
    * @return string          File path and name as string of the pdf file.
    */
 
-  public function a2pdf($attemptobj)
+  public function attempt_to_pdf($attemptobj)
   {
-    $attempt_info = $this->get_additionnal_informations($attemptobj);
 
+    //$attempt_info = $this->get_additionnal_informations($attemptobj);
     $pdf = new Pdf(array(
-      'binary' => '/usr/bin/wkhtmltopdf',
+      'binary' => '/usr/local/bin/wkhtmltopdf',
       'no-outline',         // Make Chrome not complain
       'margin-top'    => 0,
       'margin-right'  => 0,
       'margin-bottom' => 0,
       'margin-left'   => 0,
-
-      // Default page options
       'disable-smart-shrinking',
       'user-style-sheet' => __DIR__ . '/style/styles.css',
     ));
 
     // Start output buffering html
-    $additionnal_informations = '<h3 class="text-center" style="margin-bottom: -20px;">' .
-      get_string('documenttitle', 'block_signed_quiz_export', ['coursename' => $attemptobj->get_course()->fullname, 'quizname' => $attemptobj->get_quiz_name()]) .
-      '</h3>';
+    //$additionnal_informations = '<h3 class="text-center" style="margin-bottom: -20px;">' .
+    //get_string('documenttitle', 'block_signed_quiz_export', ['coursename' => $attemptobj->get_course()->fullname, 'quizname' => $attemptobj->get_quiz_name()]) .
+    // '</h3>';
 
     $html_files = $this->question_per_page($attemptobj);
     $current_page = 0;
@@ -68,7 +66,6 @@ class quiz_export_engine
       ob_start();
       include $html_file;
       $contentHTML = ob_get_clean();
-
       // Start output buffering html
       // $contentHTML = preg_replace('/(<div class="r[0-9]">)(<input.*>)(<div.*>)(<span.*>)(<div.*>)(<p>)(.*)(<\/p>)(<\/div>)(<\/div>).(<\/div>)/U', '$1 $2 $3 $4 <span>  $7  </span> $9 $10', $contentHTML);
       // $contentHTML = preg_replace('/(<div class="r[0-9]">)(<input.*>)(<div.*>)(<span class="answernumber">)(.*)(<\/span>)(<div.*>)(<p>)(.*)(<\/p>)(<\/div>)(<\/div>).(<\/div>)/U', '$1 $2 <span> $5 $7 </span> $9 $10', $contentHTML);
@@ -96,15 +93,15 @@ class quiz_export_engine
         $node->parentNode->removeChild($node);
       }
 
-      $nodes = $xpath->query('//input[@type="radio"][@checked="true"]');
-      foreach ($nodes as $node) {
-        $node->parentNode->removeChild($node);
-      }
-
-      $nodes = $xpath->query(' //input[@type="radio"][@checked]');
-      foreach ($nodes as $node) {
-        $node->setAttribute('checked', 'true');
-      }
+      //      $nodes = $xpath->query('//input[@type="radio"][@checked="true"]');
+      //      foreach ($nodes as $node) {
+      //        $node->parentNode->removeChild($node);
+      //      }
+      //
+      //      $nodes = $xpath->query(' //input[@type="radio"][@checked]');
+      //      foreach ($nodes as $node) {
+      //        $node->setAttribute('checked', 'true');
+      //      }
       $nodes = $xpath->query("//span[contains(@class, 'feedbackspan')]");
       foreach ($nodes as $node) {
         $parts = explode('<br/>', $node->ownerDocument->saveXML($node));
@@ -153,16 +150,13 @@ class quiz_export_engine
     $tmp_html_files = array();
     $showall = false;
     $num_pages = $attemptobj->get_num_pages();
-
     for ($page = 0; $page < $num_pages; $page++) {
       $questionids = $attemptobj->get_slots($page);
       $lastpage = $attemptobj->is_last_page($page);
-
       foreach ($questionids as $questionid) {
         // We have just one question id but an array is required from render function
         $slots = array();
         $slots[] = $questionid;
-
         $tmp_dir = sys_get_temp_dir();
         $tmp_file = tempnam($tmp_dir, "mdl-qexp_");
         $tmp_html_file = $tmp_file . ".html";
@@ -170,13 +164,10 @@ class quiz_export_engine
         chmod($tmp_html_file, 0644);
         //have quiz summeray on every page as head
         $output = $this->get_review_html($attemptobj, $slots, $page, $showall, $lastpage);
-
         file_put_contents($tmp_html_file, $output);
-
         $tmp_html_files[] = $tmp_html_file;
       }
     }
-
     return $tmp_html_files;
   }
 
@@ -213,31 +204,21 @@ class quiz_export_engine
   protected function render($attemptobj, $slots, $page, $showall, $lastpage)
   {
     global $PAGE;
-
     $options = $attemptobj->get_display_options(true);
-
     // Ugly hack to get a new page
     $this->setup_new_page();
-
-    $url = new moodle_url('/mod/quiz/report/export/a2pdf.php', array('attempt' => $attemptobj->get_attemptid()));
-    $PAGE->set_url($url);
+    //$url = new moodle_url('/mod/quiz/report/export/a2pdf.php', array('attempt' => $attemptobj->get_attemptid()));
+    //$PAGE->set_url($url);
 
     // Set up the page header.
     // $headtags = $attemptobj->get_html_head_contributions($page, $showall);
     // $PAGE->set_title($attemptobj->get_quiz_name());
     // $PAGE->set_heading($attemptobj->get_course()->fullname);
-
     $summarydata = $this->summary_table($attemptobj, $options);
-
     // Display only content
     // $PAGE->force_theme('boost');
     $PAGE->set_pagelayout('embedded');
-
     $output = $PAGE->get_renderer('mod_quiz');
-
-    // Fool out mod_quiz renderer:
-    // 		set $page = 0 for showing comple summary table on every page
-    // 			side effect: breaks next page links
     return $output->review_page($attemptobj, $slots, 0, $showall, $lastpage, $options, $summarydata);
   }
 
@@ -252,12 +233,10 @@ class quiz_export_engine
   protected function summary_table($attemptobj, $options)
   {
     global $USER, $DB;
-
     // Work out some time-related things.
     $attempt = $attemptobj->get_attempt();
     $quiz = $attemptobj->get_quiz();
     $overtime = 0;
-
     if ($attempt->state == quiz_attempt::FINISHED) {
       if ($timetaken = ($attempt->timefinish - $attempt->timestart)) {
         if ($quiz->timelimit && $timetaken > ($quiz->timelimit + 60)) {
@@ -271,7 +250,6 @@ class quiz_export_engine
     } else {
       $timetaken = get_string('unfinished', 'quiz');
     }
-
     // Prepare summary informat about the whole attempt.
     $summarydata = array();
     if (!$attemptobj->get_quiz()->showuserpicture && $attemptobj->get_userid() != $USER->id) {
@@ -418,13 +396,12 @@ class quiz_export_engine
       'quizname' => $attemptobj->get_quiz_name()
     ];
   }
-
-  /**
-   * Encode all images in base64 to render it in the pdf
-   *
-   * @param $html
-   * @return string|string[]
-   */
+}
+/**
+ * Encode all images in base64 to render it in the pdf
+ *
+ * @param $html
+ * @return string|string[]
   protected function preloadImageWithCurrentSession($html)
   {
     global $CFG;
@@ -462,4 +439,4 @@ class quiz_export_engine
     }
     return $html;
   }
-}
+ */

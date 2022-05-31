@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/signed_quiz_export/db" VERSION="20211005" COMMENT="XMLDB file for Moodle blocks/signed_quiz_export"
+<XMLDB PATH="blocks/signed_quiz_export/db" VERSION="20220531" COMMENT="XMLDB file for Moodle blocks/signed_quiz_export"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -11,7 +11,7 @@
         <FIELD NAME="sdate" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="date of backup signing"/>
         <FIELD NAME="teacherid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="quiz instance id"/>
-        <FIELD NAME="valid" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="report is validated by rfc3161"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Status of the archiving task. Either pending, failed, verified."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

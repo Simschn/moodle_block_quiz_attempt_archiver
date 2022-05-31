@@ -2622,4 +2622,9 @@ button.bg-gray:focus {
 	display: flex;
 	margin: .25rem 0;
 	align-items: flex-start;
+  display: -webkit-box; /* wkhtmltopdf uses this one */
+}
+
+.d-flex {
+   display: -webkit-box;
 }
