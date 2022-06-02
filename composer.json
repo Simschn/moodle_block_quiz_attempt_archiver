@@ -13,7 +13,8 @@
     "composer/installers": "~1.0",
     "ext-curl": "*",
     "ext-json": "*",
-    "mikehaertl/phpwkhtmltopdf": "^2.5"
+    "mikehaertl/phpwkhtmltopdf": "^2.5",
+    "moodlehq/moodle-cs": "^3.2"
   },
   "require-dev": {
     "moodle/moodle": "3.11"
@@ -23,7 +24,8 @@
   },
   "config": {
     "allow-plugins": {
-      "composer/installers": true
+      "composer/installers": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
     }
   }
 }

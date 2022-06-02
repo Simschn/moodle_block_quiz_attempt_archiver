@@ -14,22 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->libdir/formslib.php");
 
-class block_form_sign extends moodleform {
-    /**
-     * @throws coding_exception
-     */
-    public function definition() {
-        global $CFG;
+class block_form_sign extends moodleform
+{
 
-        $mform = $this->_form; // Don't forget the underscore
-        $mform->addElement('submit', 'signbutton', get_string('buttonsign','block_signed_quiz_export'));
-        $mform->closeHeaderBefore('signbutton');
-        $mform->setDefault('id',$this->_customdata['id']);
-    }
+  /**
+   * @throws coding_exception
+   */
+  public function definition()
+  {
+    $mform = $this->_form;
+    $mform->addElement('submit', 'signbutton', get_string('archive', 'block_signed_quiz_export'));
+    $mform->closeHeaderBefore('signbutton');
+    $mform->setDefault('id', $this->_customdata['id']);
+  }
 
-    function validation($data, $files) {
-        return array();
-    }
+  public function validation($data, $files)
+  {
+    return array();
+  }
 }

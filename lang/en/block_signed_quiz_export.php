@@ -25,3 +25,6 @@ $string['tsdomain'] = 'Timestamp Server';
 $string['tsinfo'] = 'Select a server to be used for the rfc3161 signing process';
 $string['tscert'] = 'Timestamp Server verification Certificate';
 $string['tscertinfo'] = 'Set a direct link to the corresponding certificate chain';
+$string['download'] = 'Download Quiz Attempts';
+$string['archive'] = 'Archive Quiz Attempts';
+$string['attemptfrom'] = 'Attempts from ';

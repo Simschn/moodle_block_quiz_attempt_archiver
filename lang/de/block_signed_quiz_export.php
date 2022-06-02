@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -25,3 +24,6 @@ $string['tsdomain'] = 'Zeitstempel Server';
 $string['tsinfo'] = 'Wählen sie einen Server für den rfc3161 Signaturprozess aus';
 $string['tscert'] = 'Zertifikatskette des Zeitstempelservers';
 $string['tscertinfo'] = 'Setzen sie eine Url zur Zertifikatskette des Signierenden Servers ';
+$string['download'] = 'Klausurversuche herunterladen';
+$string['archive'] = 'Klausurversuche archivieren';
+$string['attemptfrom'] = 'Versuch von ';

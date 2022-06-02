@@ -28,11 +28,10 @@ require_once($CFG->dirroot . '/lib/moodlelib.php');
 
 $exportid = required_param('exportid', PARAM_INT);
 
-$quiz_exports = $DB->get_records('signed_quiz_export', array('id' => $exportid));
-$filepath = $CFG->dataroot . current($quiz_exports)->path;
+$quizexports = $DB->get_records('signed_quiz_export', array('id' => $exportid));
+$filepath = $CFG->dataroot . current($quizexports)->path;
 header("Content-Type: application/zip");
-$filepath_parts = explode('/', $filepath);
-header("Content-Disposition: attachment; filename=\"" . end($filepath_parts));
+$filepathparts = explode('/', $filepath);
+header("Content-Disposition: attachment; filename=\"" . end($filepathparts));
 readfile($filepath);
 die();
-

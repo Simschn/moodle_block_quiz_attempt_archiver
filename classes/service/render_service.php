@@ -25,11 +25,24 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace block_signed_quiz_export\service;
+
+use DOMDocument;
+use DOMXPath;
+use Exception;
+use stdClass;
+use question_display_options;
+use quiz_attempt;
+use user_picture;
+use action_link;
+use moodle_url;
+use html_writer;
+
 use mikehaertl\wkhtmlto\Pdf;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once(__DIR__ . '/../../vendor/autoload.php');
 
 class render_service
 {
@@ -42,8 +55,7 @@ class render_service
 
   public function attempt_to_pdf($attemptobj)
   {
-
-    //$attempt_info = $this->get_additionnal_informations($attemptobj);
+    // $attempt_info = $this->get_additionnal_informations($attemptobj);
     $pdf = new Pdf(array(
       'binary' => '/usr/local/bin/wkhtmltopdf',
       'no-outline',         // Make Chrome not complain
@@ -52,36 +64,36 @@ class render_service
       'margin-bottom' => 0,
       'margin-left'   => 0,
       'disable-smart-shrinking',
-      'user-style-sheet' => __DIR__ . '/style/styles.css',
+      'user-style-sheet' => __DIR__ . '/../../style/styles.css',
     ));
 
     // Start output buffering html
-    //$additionnal_informations = '<h3 class="text-center" style="margin-bottom: -20px;">' .
-    //get_string('documenttitle', 'block_signed_quiz_export', ['coursename' => $attemptobj->get_course()->fullname, 'quizname' => $attemptobj->get_quiz_name()]) .
+    // $additionnal_informations = '<h3 class="text-center" style="margin-bottom: -20px;">' .
+    // get_string('documenttitle', 'block_signed_quiz_export', ['coursename' => $attemptobj->get_course()->fullname, 'quizname' => $attemptobj->get_quiz_name()]) .
     // '</h3>';
 
-    $html_files = $this->question_per_page($attemptobj);
-    $current_page = 0;
-    foreach ($html_files as $html_file) {
+    $htmlfiles = $this->question_per_page($attemptobj);
+    $currentpage = 0;
+    foreach ($htmlfiles as $htmlfile) {
       ob_start();
-      include $html_file;
-      $contentHTML = ob_get_clean();
+      include $htmlfile;
+      $contenthtml = ob_get_clean();
       // Start output buffering html
       // $contentHTML = preg_replace('/(<div class="r[0-9]">)(<input.*>)(<div.*>)(<span.*>)(<div.*>)(<p>)(.*)(<\/p>)(<\/div>)(<\/div>).(<\/div>)/U', '$1 $2 $3 $4 <span>  $7  </span> $9 $10', $contentHTML);
       // $contentHTML = preg_replace('/(<div class="r[0-9]">)(<input.*>)(<div.*>)(<span class="answernumber">)(.*)(<\/span>)(<div.*>)(<p>)(.*)(<\/p>)(<\/div>)(<\/div>).(<\/div>)/U', '$1 $2 <span> $5 $7 </span> $9 $10', $contentHTML);
       // $contentHTML = preg_replace('/(<div class="r[0-9].*">)(<input.*\/>)(<div.*>)(<span class="answernumber">)(.*)(<\/span>)(<div.*>)(<p.*>)(.*)(<\/p>)(<\/div>)(<\/div>)/U', '$1 $2 <span> $5 $9 </span> $11 $12', $contentHTML);
-      //$contentHTML = preg_replace('/(<div class="r[0-9].*">)(<input.*\/>)(<div.*>)(<span class="answernumber">)(.*)(<\/span>)(<div.*>)(<p.*>)(.*)<br>(<\/p>)(<\/div>)(<\/div>)/U', '$1 $2 <span> $5 $9 </span>', $contentHTML);
-      //$contentHTML = preg_replace('/<span[^>]*accesshide.*>.*<\/span>/U', '', $contentHTML);
-      $contentHTML = preg_replace('/accesshide/U', '', $contentHTML);
-      //$contentHTML = preg_replace('/size="[0-9]"/', 'size="10"', $contentHTML);
-      //$contentHTML = preg_replace('/<script(.*?)>(.*?)<\/script>/is', '', $contentHTML);
-      //$contentHTML = preg_replace('/visibleifjs/', '', $contentHTML);
-      //$contentHTML = preg_replace('/<td class="control correct hiddenifjs">(.*?)<\/td>/', '', $contentHTML);
-      /* $contentHTML = preg_replace('/<span class="feedbackspan accesshide"(.*)?>(.*)?<\/span>$/is', '', $contentHTML); 
-      $contentHTML = preg_replace('/<link(.*)?\/>/', '', $contentHTML); */
+      // $contentHTML = preg_replace('/(<div class="r[0-9].*">)(<input.*\/>)(<div.*>)(<span class="answernumber">)(.*)(<\/span>)(<div.*>)(<p.*>)(.*)<br>(<\/p>)(<\/div>)(<\/div>)/U', '$1 $2 <span> $5 $9 </span>', $contentHTML);
+      // $contentHTML = preg_replace('/<span[^>]*accesshide.*>.*<\/span>/U', '', $contentHTML);
+      $contenthtml = preg_replace('/accesshide/U', '', $contenthtml);
+      // $contentHTML = preg_replace('/size="[0-9]"/', 'size="10"', $contentHTML);
+      // $contentHTML = preg_replace('/<script(.*?)>(.*?)<\/script>/is', '', $contentHTML);
+      // $contentHTML = preg_replace('/visibleifjs/', '', $contentHTML);
+      // $contentHTML = preg_replace('/<td class="control correct hiddenifjs">(.*?)<\/td>/', '', $contentHTML);
+      /* $contentHTML = preg_replace('/<span class="feedbackspan accesshide"(.*)?>(.*)?<\/span>$/is', '', $contentHTML);
+            $contentHTML = preg_replace('/<link(.*)?\/>/', '', $contentHTML); */
       $dom = new DOMDocument('1.0', 'UTF-8');
       libxml_use_internal_errors(true);
-      $dom->loadHTML($contentHTML);
+      $dom->loadHTML($contenthtml);
       $xpath = new DOMXPath($dom);
 
       $nodes = $xpath->query("//script");
@@ -93,26 +105,26 @@ class render_service
         $node->parentNode->removeChild($node);
       }
 
-      //      $nodes = $xpath->query('//input[@type="radio"][@checked="true"]');
-      //      foreach ($nodes as $node) {
-      //        $node->parentNode->removeChild($node);
-      //      }
+      // $nodes = $xpath->query('//input[@type="radio"][@checked="true"]');
+      // foreach ($nodes as $node) {
+      // $node->parentNode->removeChild($node);
+      // }
       //
-      //      $nodes = $xpath->query(' //input[@type="radio"][@checked]');
-      //      foreach ($nodes as $node) {
-      //        $node->setAttribute('checked', 'true');
-      //      }
+      // $nodes = $xpath->query(' //input[@type="radio"][@checked]');
+      // foreach ($nodes as $node) {
+      // $node->setAttribute('checked', 'true');
+      // }
       $nodes = $xpath->query("//span[contains(@class, 'feedbackspan')]");
       foreach ($nodes as $node) {
         $parts = explode('<br/>', $node->ownerDocument->saveXML($node));
-        $nodePost = $dom->createElement('div');
+        $nodepost = $dom->createElement('div');
         foreach ($parts as $part) {
           $part = strip_tags($part);
-          $nodePart = $dom->createElement('div', $part);
-          $nodePost->appendChild($nodePart);
+          $nodepart = $dom->createElement('div', $part);
+          $nodepost->appendChild($nodepart);
         }
-        $nodePost->setAttribute('class', 'outcome');
-        $node->parentNode->replaceChild($nodePost, $node);
+        $nodepost->setAttribute('class', 'outcome');
+        $node->parentNode->replaceChild($nodepost, $node);
       }
 
       $nodes = $xpath->query("//div[contains(@class, 'specificfeedback')]");
@@ -127,48 +139,49 @@ class render_service
       foreach ($nodes as $node) {
         $node->setAttribute('style', 'margin-left:10px');
       }
-      $quiz_obj = $attemptobj->get_quizobj();
+      $quizobj = $attemptobj->get_quizobj();
 
       $pdf->addPage($dom->saveHTML());
 
-      $current_page++;
-      $quiz_obj = $attemptobj->get_quizobj();
-      @mkdir('/tmp/html/' . $quiz_obj->get_quiz_name(), 0777, true);
-      file_put_contents('/tmp/html/' . $quiz_obj->get_quiz_name() . '/' . $current_page . '.html', $dom->saveHTML());
+      $currentpage++;
+      $quizobj = $attemptobj->get_quizobj();
+      @mkdir('/tmp/html/' . $quizobj->get_quiz_name(), 0777, true);
+      @mkdir('/tmp/pdf/' . $quizobj->get_quiz_name(), 0777, true);
+      file_put_contents('/tmp/html/' . $quizobj->get_quiz_name() . '/' . $currentpage . '.html', $dom->saveHTML());
     }
-    $temp_file = tempnam(sys_get_temp_dir(), 'result');
-    if (!$pdf->saveAs($temp_file)) {
+    $tempfile = '/tmp/pdf/' . $quizobj->get_quiz_name() . '/' . $attemptobj->get_userid() . '.pdf';
+    if (!$pdf->saveAs($tempfile)) {
       throw new Exception($pdf->getError());
     }
-    //Cleanup
+    // Cleanup
     $this->setup_new_page();
-    return $temp_file;
+    return $tempfile;
   }
 
   protected function question_per_page($attemptobj)
   {
-    $tmp_html_files = array();
+    $tmphtmlfiles = array();
     $showall = false;
-    $num_pages = $attemptobj->get_num_pages();
-    for ($page = 0; $page < $num_pages; $page++) {
+    $numpages = $attemptobj->get_num_pages();
+    for ($page = 0; $page < $numpages; $page++) {
       $questionids = $attemptobj->get_slots($page);
       $lastpage = $attemptobj->is_last_page($page);
       foreach ($questionids as $questionid) {
         // We have just one question id but an array is required from render function
         $slots = array();
         $slots[] = $questionid;
-        $tmp_dir = sys_get_temp_dir();
-        $tmp_file = tempnam($tmp_dir, "mdl-qexp_");
-        $tmp_html_file = $tmp_file . ".html";
-        rename($tmp_file, $tmp_html_file);
-        chmod($tmp_html_file, 0644);
-        //have quiz summeray on every page as head
+        $tmpdir = sys_get_temp_dir();
+        $tmpfile = tempnam($tmpdir, "mdl-qexp_");
+        $tmphtmlfile = $tmpfile . ".html";
+        rename($tmpfile, $tmphtmlfile);
+        chmod($tmphtmlfile, 0644);
+        // have quiz summeray on every page as head
         $output = $this->get_review_html($attemptobj, $slots, $page, $showall, $lastpage);
-        file_put_contents($tmp_html_file, $output);
-        $tmp_html_files[] = $tmp_html_file;
+        file_put_contents($tmphtmlfile, $output);
+        $tmphtmlfiles[] = $tmphtmlfile;
       }
     }
-    return $tmp_html_files;
+    return $tmphtmlfiles;
   }
 
   /**
@@ -207,8 +220,8 @@ class render_service
     $options = $attemptobj->get_display_options(true);
     // Ugly hack to get a new page
     $this->setup_new_page();
-    //$url = new moodle_url('/mod/quiz/report/export/a2pdf.php', array('attempt' => $attemptobj->get_attemptid()));
-    //$PAGE->set_url($url);
+    // $url = new moodle_url('/mod/quiz/report/export/a2pdf.php', array('attempt' => $attemptobj->get_attemptid()));
+    // $PAGE->set_url($url);
 
     // Set up the page header.
     // $headtags = $attemptobj->get_html_head_contributions($page, $showall);
@@ -225,7 +238,6 @@ class render_service
   /**
    * Generates a quiz review summary table.
    * The Code is original from mod/quiz/review.php and just wrapped to a function.
-   *
    * @param quiz_attempt $attemptobj The attempt object the summary is for.
    * @param mod_quiz_display_options $options Extra options for the attempt.
    * @return array contains all table data for summary table
@@ -300,10 +312,8 @@ class render_service
     // Show marks (if the user is allowed to see marks at the moment).
     $grade = quiz_rescale_grade($attempt->sumgrades, $quiz, false);
     if ($options->marks >= question_display_options::MARK_AND_MAX && quiz_has_grades($quiz)) {
-
       if ($attempt->state != quiz_attempt::FINISHED) {
         // Cannot display grade.
-
       } else if (is_null($grade)) {
         $summarydata['grade'] = array(
           'title' => get_string('grade', 'quiz'),
@@ -387,11 +397,11 @@ class render_service
   public function get_additionnal_informations($attemptobj)
   {
     global $DB;
-    $user_id = $attemptobj->get_userid();
-    $user_informations = $DB->get_record('user', ['id' => $user_id], 'firstname, lastname');
+    $userid = $attemptobj->get_userid();
+    $userinformations = $DB->get_record('user', ['id' => $userid], 'firstname, lastname');
     return [
-      'firstname' => $user_informations->firstname,
-      'lastname' => $user_informations->lastname,
+      'firstname' => $userinformations->firstname,
+      'lastname' => $userinformations->lastname,
       'coursename' => $attemptobj->get_course()->fullname,
       'quizname' => $attemptobj->get_quiz_name()
     ];
@@ -402,8 +412,7 @@ class render_service
  *
  * @param $html
  * @return string|string[]
-  protected function preloadImageWithCurrentSession($html)
-  {
+  protected function preloadImageWithCurrentSession($html) {
     global $CFG;
     $matches = [];
     $matches_content = [];

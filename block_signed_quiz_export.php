@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
  *  Moodle Block Plugin Main file
  *
@@ -26,14 +25,16 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/forms/block_form_sign.php');
-require_once($CFG->dirroot . '/blocks/signed_quiz_export/services/render_service.php');
-require_once($CFG->dirroot . '/blocks/signed_quiz_export/services/timestamp_service.php');
-require_once($CFG->dirroot . '/blocks/signed_quiz_export/tasks/render_task.php');
+require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/service/render_service.php');
+require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/service/timestamp_service.php');
+require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/task/render_task.php');
+
+use \block_signed_quiz_export\task\render_task;
 
 class block_signed_quiz_export extends block_base
 {
 
-  function init()
+  public function init()
   {
     $this->title = get_string('pluginname', 'block_signed_quiz_export');
     $this->content_type = BLOCK_TYPE_TEXT;
@@ -43,9 +44,9 @@ class block_signed_quiz_export extends block_base
    * @throws coding_exception
    * @throws dml_exception
    */
-  function get_content()
+  public function get_content()
   {
-    global $DB, $PAGE;
+    global $DB;
     if ($this->content !== null) {
       return $this->content;
     }
@@ -53,38 +54,47 @@ class block_signed_quiz_export extends block_base
     $this->content->text = '';
     $this->content->footer = '';
     $cm = $this->get_owning_activity();
-    $mformSign = new block_form_sign($PAGE->url, array('id' => $cm->id));
-    // render export download table
+    $mformsign = new block_form_sign($this->page->url, array('id' => $cm->id));
+    // Render export download table.
     try {
-      $quiz_exports = $DB->get_records('signed_quiz_export', array('quizid' => $cm->instance));
-      $this->content->text = 'Download Quiz results:';
+      $quizexports = $DB->get_records('signed_quiz_export', array('quizid' => $cm->instance));
+      $this->content->text = get_string('download', 'block_signed_quiz_export');
       $this->content->text .= '<br>';
-      foreach ($quiz_exports as $quiz_export) {
-        $exportid = $quiz_export->id;
-        $this->content->text .= html_writer::tag('a', 'Export from ' . date("Y-m-d H:i:s", $quiz_export->sdate), array('href' => '/blocks/signed_quiz_export/download_export.php?exportid=' . $exportid));
-        if ($quiz_export->valid) {
-          $this->content->text .= '<i class="fa fa-check"></i>';
-        } else {
-          $this->content->text .= '<i class="fa fa-times"></i>';
+      foreach ($quizexports as $quizexport) {
+        $exportid = $quizexport->id;
+        $this->content->text .= html_writer::tag(
+          'a',
+          get_string('attemptfrom', 'block_signed_quiz_export') . date(
+            "Y-m-d H:i:s",
+            $quizexport->sdate
+          ),
+          array('href' => '/blocks/signed_quiz_export/download_export.php?exportid=' . $exportid)
+        );
+        if ($quizexport->status == 'valid') {
+          $this->content->text .= '<i class="ml-1 fa fa-check"></i>';
+        } else if ($quizexport->status == 'invalid') {
+          $this->content->text .= '<i class="ml-1 fa fa-times"></i>';
+        } else if ($quizexport->status == 'pending') {
+          $this->content->text .= '<i class="ml-1 fa fa-clock-o"></i>';
         }
         $this->content->text .= '<br>';
       }
     } catch (Exception $e) {
+      throw $e;
     }
 
-    if ($mformSign->get_data()) {
+    if ($mformsign->get_data()) {
       try {
-        $quiz_attempts = $DB->get_records('quiz_attempts', array('quiz' => $cm->instance));
-        $this->process_attempts($quiz_attempts);
+        $quizattempts = $DB->get_records('quiz_attempts', array('quiz' => $cm->instance));
+        $this->process_attempts($quizattempts, $cm->instance);
       } catch (Exception $e) {
-        return $this->content;
+        throw $e;
       }
     }
-    $this->content->footer .= $mformSign->render();
+    $this->content->footer .= $mformsign->render();
     return $this->content;
   }
 
-  // my moodle can only have SITEID and it's redundant here, so take it away
   public function applicable_formats()
   {
     return array('mod-quiz' => true);
@@ -95,7 +105,7 @@ class block_signed_quiz_export extends block_base
     return true;
   }
 
-  function has_config()
+  public function has_config()
   {
     return true;
   }
@@ -139,65 +149,67 @@ class block_signed_quiz_export extends block_base
    * @throws Exception
    */
   /*
-  function sign_and_validate($attemptids, $tmp_zip_file)
-  {
-    global $CFG, $DB, $USER;
-    $time = time(); // this will get you the current time in unix time format (seconds since 1/1/1970 GMT)
-    $currentYear = userdate($time, '%Y');
-    $backupTime = userdate($time, '%Y%m%d-%H%M'); // this will print the time in the timezone of the current user (formats)
-    $quizattempt = quiz_attempt::create(current($attemptids));
-    $backupPath = $CFG->dataroot . '/backups/' . $currentYear . '/' . $quizattempt->get_course()->fullname . '/' . $quizattempt->get_quiz_name();
-    if (!is_dir($backupPath)) {
-      mkdir($backupPath, 0777, true);
+    function sign_and_validate($attemptids, $tmp_zip_file)
+    {
+      global $CFG, $DB, $USER;
+      $time = time(); // this will get you the current time in unix time format (seconds since 1/1/1970 GMT)
+      $currentYear = userdate($time, '%Y');
+      $backupTime = userdate($time, '%Y%m%d-%H%M'); // this will print the time in the timezone of the current user (formats)
+      $quizattempt = quiz_attempt::create(current($attemptids));
+      $backupPath = $CFG->dataroot . '/backups/' . $currentYear . '/' . $quizattempt->get_course()->fullname . '/' . $quizattempt->get_quiz_name();
+      if (!is_dir($backupPath)) {
+        mkdir($backupPath, 0777, true);
+      }
+      $backupFilePath =  $backupPath . '/' . $backupTime;
+      copy($tmp_zip_file, $backupFilePath . '.zip');
+      $requestFilePath = TrustedTimestamps::create_request_file($backupFilePath . '.zip');
+      copy($requestFilePath, $backupFilePath . '.tsq');
+      $response = TrustedTimestamps::sign_request_file($requestFilePath, get_config('block_signed_quiz_export', 'tsdomain'));
+      $responseFile = fopen($backupFilePath . '.tsr', 'w+') or die("Unable to open file!");
+      fwrite($responseFile, $response);
+      fclose($responseFile);
+      $isValid = TrustedTimestamps::validate($backupFilePath, $CFG->dirroot . '/blocks/signed_quiz_export/certs/dfn-cert.pem');
+      if ($isValid) {
+        $status = 'valid';
+      } else {
+        $status = 'invalid';
+      }
+      $DB->insert_record(
+        "signed_quiz_export",
+        [
+          'teacherid' => $USER->id,
+          'quizid' => $quizattempt->get_quizid(),
+          'sdate' => $time,
+          'status' => $status
+        ]
+      );
     }
-    $backupFilePath =  $backupPath . '/' . $backupTime;
-    copy($tmp_zip_file, $backupFilePath . '.zip');
-    $requestFilePath = TrustedTimestamps::create_request_file($backupFilePath . '.zip');
-    copy($requestFilePath, $backupFilePath . '.tsq');
-    $response = TrustedTimestamps::sign_request_file($requestFilePath, get_config('block_signed_quiz_export', 'tsdomain'));
-    $responseFile = fopen($backupFilePath . '.tsr', 'w+') or die("Unable to open file!");
-    fwrite($responseFile, $response);
-    fclose($responseFile);
-    $isValid = TrustedTimestamps::validate($backupFilePath, $CFG->dirroot . '/blocks/signed_quiz_export/certs/dfn-cert.pem');
-    if ($isValid) {
-      $status = 'valid';
-    } else {
-      $status = 'invalid';
-    }
-    $DB->insert_record(
-      "signed_quiz_export",
-      [
-        'teacherid' => $USER->id,
-        'quizid' => $quizattempt->get_quizid(),
-        'sdate' => $time,
-        'status' => $status
-      ]
-    );
-  }
    */
 
-  function process_attempts($quiz_attempts)
+  public function process_attempts($quizattempts, $quizid)
   {
     global $DB, $USER;
-    $quizattempt = quiz_attempt::create(current($quiz_attempts));
-    $time = time(); // this will get you the current time in unix time format (seconds since 1/1/1970 GMT)
-    $currentYear = userdate($time, '%Y');
-    $backupTime = userdate($time, '%Y%m%d-%H%M'); // this will print the time in the timezone of the current user (formats)
-    $record_id = $DB->insert_record(
+    $quizattempt = quiz_attempt::create(current(array_keys($quizattempts)));
+    $time = time();
+    $currentyear = userdate($time, '%Y');
+    $backuptime = userdate($time, '%Y%m%d-%H%M');
+    $backuppath = '/backups/' . $currentyear . '/' . $quizattempt->get_course()->fullname . '/';
+    $backuppath .= $quizattempt->get_quiz_name() . '/' . $backuptime . '.zip';
+    $archiveid = $DB->insert_record(
       "signed_quiz_export",
       [
         'teacherid' => $USER->id,
         'quizid' => $quizattempt->get_quizid(),
         'sdate' => $time,
-        'path' => '/backups/' . $currentYear . '/' . $quizattempt->get_course()->fullname . '/' . $quizattempt->get_quiz_name() . '/' . $backupTime . '.zip',
+        'path' => $backuppath,
         'status' => 'pending'
       ]
     );
-    $render_task = new render_task();
-    $render_task->set_custom_data(array('quiz_attempts' => $quiz_attempts, 'record_id' => $record_id));
-    $render_task->execute();
-    $quiz_info = $this->get_owning_activity();
-    $urltogo = new moodle_url('/mod/quiz/view.php', array('id' => $quiz_info->id));
+    $rendertask = new render_task();
+    $rendertask->set_custom_data(array('quizid' => $quizid, 'archiveid' => $archiveid));
+    \core\task\manager::queue_adhoc_task($rendertask);
+    $quizinfo = $this->get_owning_activity();
+    $urltogo = new moodle_url('/mod/quiz/view.php', array('id' => $quizinfo->id));
     redirect($urltogo);
   }
 }

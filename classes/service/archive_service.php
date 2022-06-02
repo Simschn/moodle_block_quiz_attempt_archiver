@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,15 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details
+ * Service file for Archiving of quiz results
  *
  * @package    block_signed_quiz_export
- * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
+ * @copyright  Simon Schniedenharn 2021
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace block_signed_quiz_export\service;
 
-$plugin->version   = 2022053115;       // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires  = 2012112900;        // Requires this Moodle version
-$plugin->component = 'block_signed_quiz_export'; // Full name of the plugin (used for diagnostics)
+use ZipArchive;
+
+class archive_service
+{
+
+  /* creates a zip archive and returns its path */
+  public function create_zip_archive_from_pdfs($path, $useridtopdf)
+  {
+    global $DB;
+    $zip = new ZipArchive();
+    @mkdir(pathinfo($path)['dirname'], 0755, true);
+    $zip->open($path, ZipArchive::CREATE);
+    foreach ($useridtopdf as $userid => $pdf) {
+      $student = $DB->get_record('user', array('id' => $userid));
+      $zip->addFile($pdf, fullname($student, true) . '.pdf');
+    }
+
+    $zip->close();
+  }
+}
