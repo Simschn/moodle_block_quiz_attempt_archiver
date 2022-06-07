@@ -1,9 +1,35 @@
-## Block Revision Safe Quiz result exporting
+## Block Quiz Attempt Archiver
+Mit diesem Plugin lassen sich Quizversuche vom Quizersteller als PDF exportieren sowie revisionssicher durch das Time Stamping Protocol (RFC3161) im Dateisystem archiveren. Der primäre Anwendungszweck ist der Einsatz bei E-Accessments an Hochschulen.
+
+### Abhängigkeiten
+- wkhtmltopdf (Erstellt aus HTML Dateien PDFs)
+- openssl (https://www.openssl.org/) (Wird benutzt um die fertigen Zip Archive durch einen externen Server zu Signieren und Validieren)
+
+### Installation
+Damit alle abhänigkeiten Richtig aufgelöst werden können, ist vor dem Einsatz das Ausführen von 
+```
+composer install
+```
+notwendig.
+
+### Technical Information
+Zuerst werden alle Quiz Versuche aus der Datenbank gelesen und durch Moodles internen Renderer in HTML überführt. Folgend werden durch wkhtmltopdf PDF Dateien aus dem HTML generiert. Diese werden in ein Zip Archiv gespeichert und gehashed an den Externen Timestamping Server gesendet. Dieser verifiziert den Inhalt und sendet einen signierten Hash zurück. Nachträglich besteht so die Möglichkeit die Korrektheit der Daten bis zum Zeitpunkt der Signatur zu verifizieren.
+
+### Practical Information
+Der Block kann lediglich zu mod_quiz Ressourcen hinzugefüht werden. Im Block befindet sich ein Button welcher den Archiviervorgang für das aktuelle quiz auslöst. Nach dem erfolgreichen archivieren befindet sich nun im Block ein linkt der einen Download des erstellten ZipArchives ermöglicht. Die signierten Zip Archive befinden sich folgend im moodledata/backup Ordner.
+
+### Settings
+Damit das Plugin funktioniert müssen Zwei Einstellungen gesetzt sein. Zum einen die Url des Timestamping Servers (Standard ist ein öffentlicher Server des DFN) und zum anderen ein Link zum Download des dazugehörigen Zertifikates.
+
+### Copyright
+Das plugin basiert auf (https://github.com/cbluesprl/moodle-quiz_export) welches selbst auf (https://github.com/elccHTWBerlin/moodle-quiz-export) basiert. Es wurde weitreichend verändert um als Block Instanz in Moodle verwendet werden zu können. 
+
+## Block Quiz Attempt Archiver
 
 This Moodle Block plugin saves and signs the results of a quiz activity timestamped with an rfc3161 compliant server. It further gives Teachers an easy way to download a Zip of all exported Results converted to PDF files. It is intended to be used as support for E-Assesments based on moodle quizzes.
 
 ### Dependencies
-- mpdf (https://mpdf.github.io/)
+- wkhtmltopdf (used to render html to pdf)
 - openssl (https://www.openssl.org/) must be installed independently based on OS Distribution. It is needed for creating and verifying Timestamping requests and responses.
 
 ### Installation
