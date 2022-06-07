@@ -17,7 +17,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
-    'block/signed_quiz_export:myaddinstance' => array(
+    'block/quiz_attempt_archiver:myaddinstance' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => array(
@@ -26,7 +26,7 @@ $capabilities = array(
 
         'clonepermissionsfrom' => 'moodle/my:manageblocks'
     ),
-    'block/signed_quiz_export:addinstance' => array(
+    'block/quiz_attempt_archiver:addinstance' => array(
         'riskbitmask' => RISK_SPAM | RISK_XSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_BLOCK,

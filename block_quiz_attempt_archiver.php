@@ -24,19 +24,19 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/forms/block_form_sign.php');
-require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/service/render_service.php');
-require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/service/timestamp_service.php');
-require_once($CFG->dirroot . '/blocks/signed_quiz_export/classes/task/render_task.php');
+require_once($CFG->dirroot . '/blocks/quiz_attempt_archiver/classes/forms/block_form_sign.php');
+require_once($CFG->dirroot . '/blocks/quiz_attempt_archiver/classes/service/render_service.php');
+require_once($CFG->dirroot . '/blocks/quiz_attempt_archiver/classes/service/timestamp_service.php');
+require_once($CFG->dirroot . '/blocks/quiz_attempt_archiver/classes/task/render_task.php');
 
-use \block_signed_quiz_export\task\render_task;
+use \block_quiz_attempt_archiver\task\render_task;
 
-class block_signed_quiz_export extends block_base
+class block_quiz_attempt_archiver extends block_base
 {
 
   public function init()
   {
-    $this->title = get_string('pluginname', 'block_signed_quiz_export');
+    $this->title = get_string('pluginname', 'block_quiz_attempt_archiver');
     $this->content_type = BLOCK_TYPE_TEXT;
   }
 
@@ -57,18 +57,18 @@ class block_signed_quiz_export extends block_base
     $mformsign = new block_form_sign($this->page->url, array('id' => $cm->id));
     // Render export download table.
     try {
-      $quizexports = $DB->get_records('signed_quiz_export', array('quizid' => $cm->instance));
-      $this->content->text = get_string('download', 'block_signed_quiz_export');
+      $quizexports = $DB->get_records('quiz_attempt_archiver', array('quizid' => $cm->instance));
+      $this->content->text = get_string('download', 'block_quiz_attempt_archiver');
       $this->content->text .= '<br>';
       foreach ($quizexports as $quizexport) {
         $exportid = $quizexport->id;
         $this->content->text .= html_writer::tag(
           'a',
-          get_string('attemptfrom', 'block_signed_quiz_export') . date(
+          get_string('attemptfrom', 'block_quiz_attempt_archiver') . date(
             "Y-m-d H:i:s",
             $quizexport->sdate
           ),
-          array('href' => '/blocks/signed_quiz_export/download_export.php?exportid=' . $exportid)
+          array('href' => '/blocks/quiz_attempt_archiver/download_export.php?exportid=' . $exportid)
         );
         if ($quizexport->status == 'valid') {
           $this->content->text .= '<i class="ml-1 fa fa-check"></i>';
@@ -164,18 +164,18 @@ class block_signed_quiz_export extends block_base
       copy($tmp_zip_file, $backupFilePath . '.zip');
       $requestFilePath = TrustedTimestamps::create_request_file($backupFilePath . '.zip');
       copy($requestFilePath, $backupFilePath . '.tsq');
-      $response = TrustedTimestamps::sign_request_file($requestFilePath, get_config('block_signed_quiz_export', 'tsdomain'));
+      $response = TrustedTimestamps::sign_request_file($requestFilePath, get_config('block_quiz_attempt_archiver', 'tsdomain'));
       $responseFile = fopen($backupFilePath . '.tsr', 'w+') or die("Unable to open file!");
       fwrite($responseFile, $response);
       fclose($responseFile);
-      $isValid = TrustedTimestamps::validate($backupFilePath, $CFG->dirroot . '/blocks/signed_quiz_export/certs/dfn-cert.pem');
+      $isValid = TrustedTimestamps::validate($backupFilePath, $CFG->dirroot . '/blocks/quiz_attempt_archiver/certs/dfn-cert.pem');
       if ($isValid) {
         $status = 'valid';
       } else {
         $status = 'invalid';
       }
       $DB->insert_record(
-        "signed_quiz_export",
+        "quiz_attempt_archiver",
         [
           'teacherid' => $USER->id,
           'quizid' => $quizattempt->get_quizid(),
@@ -196,7 +196,7 @@ class block_signed_quiz_export extends block_base
     $backuppath = '/backups/' . $currentyear . '/' . $quizattempt->get_course()->fullname . '/';
     $backuppath .= $quizattempt->get_quiz_name() . '/' . $backuptime . '.zip';
     $archiveid = $DB->insert_record(
-      "signed_quiz_export",
+      "quiz_attempt_archiver",
       [
         'teacherid' => $USER->id,
         'quizid' => $quizattempt->get_quizid(),

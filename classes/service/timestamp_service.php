@@ -12,7 +12,7 @@
  * @package trustedtimestamps
  */
 
-namespace block_signed_quiz_export\service;
+namespace block_quiz_attempt_archiver\service;
 
 use Exception;
 

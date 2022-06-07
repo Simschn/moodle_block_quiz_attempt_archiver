@@ -18,7 +18,7 @@
 /**
  * Signed quiz export block settings
  *
- * @package    signed_quiz_export
+ * @package    quiz_attempt_archiver
  * @copyright  Simon Schniedenharn 2021
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,21 +27,21 @@ defined('MOODLE_INTERNAL') || die();
 
 $settings->add(new admin_setting_heading(
     'sampleheader',
-    get_string('headerconfig', 'block_signed_quiz_export'),
-    get_string('descconfig', 'block_signed_quiz_export')
+    get_string('headerconfig', 'block_quiz_attempt_archiver'),
+    get_string('descconfig', 'block_quiz_attempt_archiver')
 ));
 
 $settings->add(new admin_setting_configtext(
-    'block_signed_quiz_export/tsdomain',
-    get_string('tsdomain', 'block_signed_quiz_export'),
-    get_string('tsinfo', 'block_signed_quiz_export'),
+    'block_quiz_attempt_archiver/tsdomain',
+    get_string('tsdomain', 'block_quiz_attempt_archiver'),
+    get_string('tsinfo', 'block_quiz_attempt_archiver'),
     'http://zeitstempel.dfn.de',
     PARAM_TEXT
 ));
 $settings->add(new admin_setting_configtext(
-    'block_signed_quiz_export/tscert',
-    get_string('tscert', 'block_signed_quiz_export'),
-    get_string('tscertinfo', 'block_signed_quiz_export'),
+    'block_quiz_attempt_archiver/tscert',
+    get_string('tscert', 'block_quiz_attempt_archiver'),
+    get_string('tscertinfo', 'block_quiz_attempt_archiver'),
     'https://pki.pca.dfn.de/dfn-ca-global-g2/pub/cacert/chain.txt',
     PARAM_TEXT
 ));

@@ -17,7 +17,7 @@
 /**
  * This file will return a Zip containing all Quiz results as individual PDFs per person
  *
- * @package    block_signed_quiz_export
+ * @package    block_quiz_attempt_archiver
  * @copyright  Simon Schniedenharn 2021
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,7 +28,7 @@ require_once($CFG->dirroot . '/lib/moodlelib.php');
 
 $exportid = required_param('exportid', PARAM_INT);
 
-$quizexports = $DB->get_records('signed_quiz_export', array('id' => $exportid));
+$quizexports = $DB->get_records('quiz_attempt_archiver', array('id' => $exportid));
 $filepath = $CFG->dataroot . current($quizexports)->path;
 header("Content-Type: application/zip");
 $filepathparts = explode('/', $filepath);

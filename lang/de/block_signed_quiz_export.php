@@ -16,7 +16,7 @@
 
 $string['descconfig'] = 'Bitte geben sie die Urls zu ihrem Zeitstempel Server an';
 $string['headerconfig'] = 'Zeitstempel Server Urls';
-$string['signed_quiz_export:addinstance'] = 'Füge einen neuen block zur revisionssicheren Speicherung hinzu';
+$string['quiz_attempt_archiver:addinstance'] = 'Füge einen neuen block zur revisionssicheren Speicherung hinzu';
 $string['pluginname'] = 'Revisionssicherer Quiz Export';
 $string['buttonsign'] = 'Signieren und speichern';
 $string['documenttitle'] = '{$a->coursename} - {$a->quizname}';

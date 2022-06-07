@@ -17,12 +17,12 @@
 /**
  * Service file for Archiving of quiz results
  *
- * @package    block_signed_quiz_export
+ * @package    block_quiz_attempt_archiver
  * @copyright  Simon Schniedenharn 2021
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace block_signed_quiz_export\service;
+namespace block_quiz_attempt_archiver\service;
 
 use ZipArchive;
 

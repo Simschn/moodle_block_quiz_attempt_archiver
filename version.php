@@ -18,7 +18,7 @@
 /**
  * Version details
  *
- * @package    block_signed_quiz_export
+ * @package    block_quiz_attempt_archiver
  * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,4 +27,4 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->version   = 2022053115;       // The current plugin version (Date: YYYYMMDDXX)
 $plugin->requires  = 2012112900;        // Requires this Moodle version
-$plugin->component = 'block_signed_quiz_export'; // Full name of the plugin (used for diagnostics)
+$plugin->component = 'block_quiz_attempt_archiver'; // Full name of the plugin (used for diagnostics)

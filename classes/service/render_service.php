@@ -25,7 +25,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace block_signed_quiz_export\service;
+namespace block_quiz_attempt_archiver\service;
 
 use DOMDocument;
 use DOMXPath;
@@ -69,7 +69,7 @@ class render_service
 
     // Start output buffering html
     // $additionnal_informations = '<h3 class="text-center" style="margin-bottom: -20px;">' .
-    // get_string('documenttitle', 'block_signed_quiz_export', ['coursename' => $attemptobj->get_course()->fullname, 'quizname' => $attemptobj->get_quiz_name()]) .
+    // get_string('documenttitle', 'block_quiz_attempt_archiver', ['coursename' => $attemptobj->get_course()->fullname, 'quizname' => $attemptobj->get_quiz_name()]) .
     // '</h3>';
 
     $htmlfiles = $this->question_per_page($attemptobj);

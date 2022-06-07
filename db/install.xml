@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/signed_quiz_export/db" VERSION="20220531" COMMENT="XMLDB file for Moodle blocks/signed_quiz_export"
+<XMLDB PATH="blocks/quiz_attempt_archiver/db" VERSION="20220531" COMMENT="XMLDB file for Moodle blocks/quiz_attempt_archiver"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="signed_quiz_export" COMMENT="Default comment for block_signed_quiz_export, please edit me">
+    <TABLE NAME="quiz_attempt_archiver" COMMENT="Default comment for block_quiz_attempt_archiver, please edit me">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="path" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="path to backup file from moodle_data_root"/>

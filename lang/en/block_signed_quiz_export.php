@@ -17,7 +17,7 @@
 
 $string['descconfig'] = 'Urls for the timestamping Service';
 $string['headerconfig'] = 'Time stamping Urls';
-$string['signed_quiz_export:addinstance'] = 'Add a signed quiz export block';
+$string['quiz_attempt_archiver:addinstance'] = 'Add a signed quiz export block';
 $string['pluginname'] = 'Signed Quiz Export';
 $string['buttonsign'] = 'Sign and Save';
 $string['documenttitle'] = '{$a->coursename} - {$a->quizname}';

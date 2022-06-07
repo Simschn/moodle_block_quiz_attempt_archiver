@@ -26,7 +26,7 @@ class block_form_sign extends moodleform
   public function definition()
   {
     $mform = $this->_form;
-    $mform->addElement('submit', 'signbutton', get_string('archive', 'block_signed_quiz_export'));
+    $mform->addElement('submit', 'signbutton', get_string('archive', 'block_quiz_attempt_archiver'));
     $mform->closeHeaderBefore('signbutton');
     $mform->setDefault('id', $this->_customdata['id']);
   }
