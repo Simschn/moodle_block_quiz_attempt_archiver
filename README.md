@@ -12,13 +12,13 @@ composer install
 ```
 notwendig.
 
-### Technical Information
+### Technische Informationen
 Zuerst werden alle Quiz Versuche aus der Datenbank gelesen und durch Moodles internen Renderer in HTML überführt. Folgend werden durch wkhtmltopdf PDF Dateien aus dem HTML generiert. Diese werden in ein Zip Archiv gespeichert und gehashed an den Externen Timestamping Server gesendet. Dieser verifiziert den Inhalt und sendet einen signierten Hash zurück. Nachträglich besteht so die Möglichkeit die Korrektheit der Daten bis zum Zeitpunkt der Signatur zu verifizieren.
 
-### Practical Information
+### Benutzungshinweise
 Der Block kann lediglich zu mod_quiz Ressourcen hinzugefüht werden. Im Block befindet sich ein Button welcher den Archiviervorgang für das aktuelle quiz auslöst. Nach dem erfolgreichen archivieren befindet sich nun im Block ein linkt der einen Download des erstellten ZipArchives ermöglicht. Die signierten Zip Archive befinden sich folgend im moodledata/backup Ordner.
 
-### Settings
+### Einstellungen 
 Damit das Plugin funktioniert müssen Zwei Einstellungen gesetzt sein. Zum einen die Url des Timestamping Servers (Standard ist ein öffentlicher Server des DFN) und zum anderen ein Link zum Download des dazugehörigen Zertifikates.
 
 ### Copyright
