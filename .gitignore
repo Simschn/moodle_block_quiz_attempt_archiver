@@ -1,5 +1,5 @@
 vendor/
 block.zip
 .idea/
-.php-cs-fix.cache
+.php-cs-fixer.cache
 
